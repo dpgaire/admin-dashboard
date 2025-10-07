@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -8,13 +8,12 @@ import {
   Edit,
   Trash2,
   Layers,
-  FolderOpen,
   Save,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -30,16 +29,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { subcategoriesAPI, skillsAPI } from "../services/api";
-import { subcategorySchema } from "../utils/validationSchemas";
+import { skillsAPI } from "../services/api";
+import { skillSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -48,152 +39,130 @@ const Skills = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingSubcategory, setEditingSubcategory] = useState(null);
+  const [editingSkill, setEditingSkill] = useState(null);
 
-  const { data: skillsData = [], isLoading: isLoadingSkills } =
-    useQuery({
-      queryKey: ["skills"],
-      queryFn: async () => {
-        const response = await skillsAPI.getAll();
-        return response.data || [];
-      },
-      onError: (error) => {
-        console.error("Error fetching subcategories:", error);
-        toast.error("Failed to load subcategories");
-      },
-    });
-
-  // const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
-  //   queryKey: ["categories"],
-  //   queryFn: async () => {
-  //     const response = await categoriesAPI.getAll();
-  //     return response.data || [];
-  //   },
-  //   onError: (error) => {
-  //     console.error("Error fetching categories:", error);
-  //     toast.error("Failed to load categories");
-  //   },
-  // });
+  const { data: skillsData = [], isLoading: isLoadingSkills } = useQuery({
+    queryKey: ["skills"],
+    queryFn: async () => {
+      const response = await skillsAPI.getAll();
+      return response.data || [];
+    },
+    onError: (error) => {
+      console.error("Error fetching skills:", error);
+      toast.error("Failed to load skills");
+    },
+  });
 
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
+    control: controlCreate,
     formState: { errors: errorsCreate },
     reset: resetCreate,
-    setValue: setValueCreate,
   } = useForm({
-    resolver: yupResolver(subcategorySchema),
+    resolver: yupResolver(skillSchema),
+    defaultValues: {
+      skills: [{ name: "", percentage: "" }],
+    },
+  });
+
+  const {
+    fields: fieldsCreate,
+    append: appendCreate,
+    remove: removeCreate,
+  } = useFieldArray({
+    control: controlCreate,
+    name: "skills",
   });
 
   const {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
+    control: controlEdit,
     formState: { errors: errorsEdit },
     reset: resetEdit,
-    setValue: setValueEdit,
   } = useForm({
-    resolver: yupResolver(subcategorySchema),
+    resolver: yupResolver(skillSchema),
+  });
+
+  const {
+    fields: fieldsEdit,
+    append: appendEdit,
+    remove: removeEdit,
+  } = useFieldArray({
+    control: controlEdit,
+    name: "skills",
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => {
-    const { categoryId, ...rest } = data;
-    const transformedData = {
-      ...rest,
-      category_id: categoryId, // rename field
-    };
-
-    return subcategoriesAPI.create(transformedData);
-  },
+    mutationFn: skillsAPI.create,
     onSuccess: () => {
-      toast.success("Subcategory created successfully!");
+      toast.success("Skill created successfully!");
       setIsCreateModalOpen(false);
       resetCreate();
-      queryClient.invalidateQueries(["subcategories"]);
+      queryClient.invalidateQueries(["skills"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to create subcategory";
+        error.response?.data?.message || "Failed to create skill";
       toast.error(message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => {
-      const { categoryId, ...rest } = data;
-      const transformedData = {
-        ...rest,
-        category_id: categoryId, // rename field
-      };
-
-      return subcategoriesAPI.update(id, transformedData);
-    },
+    mutationFn: ({ id, data }) => skillsAPI.update(id, data),
     onSuccess: () => {
-      toast.success("Subcategory updated successfully!");
+      toast.success("Skill updated successfully!");
       setIsEditModalOpen(false);
-      setEditingSubcategory(null);
+      setEditingSkill(null);
       resetEdit();
-      queryClient.invalidateQueries(["subcategories"]);
+      queryClient.invalidateQueries(["skills"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to update subcategory";
+        error.response?.data?.message || "Failed to update skill";
       toast.error(message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: subcategoriesAPI.delete,
+    mutationFn: skillsAPI.delete,
     onSuccess: () => {
-      toast.success("Subcategory deleted successfully!");
-      queryClient.invalidateQueries(["subcategories"]);
+      toast.success("Skill deleted successfully!");
+      queryClient.invalidateQueries(["skills"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to delete subcategory";
+        error.response?.data?.message || "Failed to delete skill";
       toast.error(message);
     },
   });
 
-  const handleCreateSubcategory = (data) => {
+  const handleCreateSkill = (data) => {
     createMutation.mutate(data);
   };
 
-  // const handleEditSubcategory = (data) => {
-  //   updateMutation.mutate({ id: editingSubcategory._id, data });
-  // };
+  const handleEditSkill = (data) => {
+    updateMutation.mutate({ id: editingSkill._id, data });
+  };
 
-  // const handleDeleteSubcategory = (subcategoryId) => {
-  //   if (
-  //     !window.confirm(
-  //       "Are you sure you want to delete this subcategory? This will also delete all associated items."
-  //     )
-  //   ) {
-  //     return;
-  //   }
-  //   deleteMutation.mutate(subcategoryId);
-  // };
+  const handleDeleteSkill = (skillId) => {
+    if (!window.confirm("Are you sure you want to delete this skill?")) {
+      return;
+    }
+    deleteMutation.mutate(skillId);
+  };
 
-  // const openEditModal = (subcategory) => {
-  //   setEditingSubcategory(subcategory);
-  //   resetEdit({
-  //     name: subcategory.name,
-  //     description: subcategory.description || "",
-  //     categoryId: subcategory.categoryId,
-  //   });
-  //   setIsEditModalOpen(true);
-  // };
+  const openEditModal = (skill) => {
+    setEditingSkill(skill);
+    resetEdit(skill);
+    setIsEditModalOpen(true);
+  };
 
-  // const getCategoryName = (categoryId) => {
-  //   const category = categories.find((cat) => cat._id === categoryId);
-  //   return category ? category.name : "Unknown Category";
-  // };
+  const filteredSkills = skillsData.filter((skill) =>
+    skill.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const filteredSkills = skillsData
-    .filter(
-      (project) =>
-        project.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
   if (isLoadingSkills) {
     return <LoadingSpinner />;
   }
@@ -213,31 +182,27 @@ const Skills = () => {
           <DialogTrigger asChild>
             <Button className="flex items-center space-x-2">
               <Plus className="h-4 w-4" />
-              <span>Add Project</span>
+              <span>Add Skill</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
+              <DialogTitle>Create New Skill</DialogTitle>
               <DialogDescription>
-                Add a new project to organize content
+                Add a new skill category and individual skills.
               </DialogDescription>
             </DialogHeader>
             <form
-              onSubmit={handleSubmitCreate(handleCreateSubcategory)}
+              onSubmit={handleSubmitCreate(handleCreateSkill)}
               className="space-y-4"
             >
               <div className="space-y-2">
                 <Label htmlFor="create-title">Title</Label>
-                <div className="relative">
-                  <Layers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="create-title"
-                    placeholder="Enter title"
-                    className="pl-10"
-                    {...registerCreate("title")}
-                  />
-                </div>
+                <Input
+                  id="create-title"
+                  placeholder="e.g., Frontend"
+                  {...registerCreate("title")}
+                />
                 {errorsCreate.title && (
                   <p className="text-sm text-red-600">
                     {errorsCreate.title.message}
@@ -246,43 +211,53 @@ const Skills = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="create-categoryId">Select Category</Label>
-                <Select
-                  onValueChange={(value) => setValueCreate("categoryId", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select parent category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* {categories.map((category) => (
-                      <SelectItem key={category._id} value={category._id}>
-                        {category.name}
-                      </SelectItem>
-                    ))} */}
-                  </SelectContent>
-                </Select>
-                {errorsCreate.categoryId && (
+                <Label htmlFor="create-icon">Icon (Optional)</Label>
+                <Input
+                  id="create-icon"
+                  placeholder="e.g., <Code />"
+                  {...registerCreate("icon")}
+                />
+                {errorsCreate.icon && (
                   <p className="text-sm text-red-600">
-                    {errorsCreate.categoryId.message}
+                    {errorsCreate.icon.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="create-description">
-                  Description (Optional)
-                </Label>
-                <Textarea
-                  id="create-description"
-                  placeholder="Enter subcategory description"
-                  rows={3}
-                  {...registerCreate("description")}
-                />
-                {errorsCreate.description && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.description.message}
-                  </p>
-                )}
+              <div className="space-y-4">
+                <Label>Skills</Label>
+                {fieldsCreate.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Skill name (e.g., React)"
+                        {...registerCreate(`skills.${index}.name`)}
+                      />
+                    </div>
+                    <div className="w-24">
+                      <Input
+                        type="number"
+                        placeholder="%"
+                        {...registerCreate(`skills.${index}.percentage`)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCreate(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => appendCreate({ name: "", percentage: "" })}
+                >
+                  Add Skill
+                </Button>
               </div>
 
               <div className="flex items-center space-x-2 pt-4">
@@ -291,17 +266,7 @@ const Skills = () => {
                   disabled={createMutation.isLoading}
                   className="flex-1"
                 >
-                  {createMutation.isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Creating...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Save className="h-4 w-4" />
-                      <span>Create Subcategory</span>
-                    </div>
-                  )}
+                  {createMutation.isLoading ? "Creating..." : "Create Skill"}
                 </Button>
                 <Button
                   type="button"
@@ -317,13 +282,12 @@ const Skills = () => {
         </Dialog>
       </div>
 
-      {/* Search */}
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search projects by name, description, or parent category..."
+              placeholder="Search by title..."
               className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -332,69 +296,44 @@ const Skills = () => {
         </CardContent>
       </Card>
 
-      {/* Subcategories List */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            All Skills ({skillsData.length}) 
-          </CardTitle>
-          <CardDescription>
-            Manage skills
-          </CardDescription>
+          <CardTitle>All Skills ({skillsData.length})</CardTitle>
+          <CardDescription>Manage your skills</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredSkills.length === 0 ? (
             <div className="text-center py-8">
               <Layers className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm
-                  ? "No subcategories found matching your search."
-                  : "No subcategories found."}
+                No skills found.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredSkills.map((skill,index) => (
+              {filteredSkills.map((skill) => (
                 <div
-                  key={index}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  key={skill._id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white">
-                      <Layers className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-medium text-gray-900 dark:text-white">
-                          {skill.title}
-                        </h3>
-                        
-                      </div>
-                      {skill.icon && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          {skill.icon}
-                        </p>
-                      )}
-                     
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          {JSON.stringify(skill.skills)}
-                        </p>
-                      
-                      
+                  <div className="flex-1">
+                    <h3 className="font-medium">{skill.title}</h3>
+                    <div className="text-sm text-gray-500">
+                      {skill.skills.map((s) => s.name).join(", ")}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      // onClick={() => openEditModal(subcategory)}
+                      onClick={() => openEditModal(skill)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      // onClick={() => handleDeleteSubcategory(subcategory._id)}
+                      onClick={() => handleDeleteSkill(skill._id)}
                       className="text-red-600 hover:text-red-700"
                       disabled={deleteMutation.isLoading}
                     >
@@ -408,74 +347,80 @@ const Skills = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Subcategory Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Subcategory</DialogTitle>
+            <DialogTitle>Edit Skill</DialogTitle>
             <DialogDescription>
-              Update subcategory information
+              Update the skill category and individual skills.
             </DialogDescription>
           </DialogHeader>
           <form
-            // onSubmit={handleSubmitEdit(handleEditSubcategory)}
+            onSubmit={handleSubmitEdit(handleEditSkill)}
             className="space-y-4"
           >
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Subcategory Name</Label>
-              <div className="relative">
-                <Layers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="edit-name"
-                  placeholder="Enter subcategory name"
-                  className="pl-10"
-                  {...registerEdit("name")}
-                />
-              </div>
-              {errorsEdit.name && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-categoryId">Parent Category</Label>
-              <Select
-                onValueChange={(value) => setValueEdit("categoryId", value)}
-                defaultValue={editingSubcategory?.categoryId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select parent category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* {categories.map((category) => (
-                    <SelectItem key={category._id} value={category._id}>
-                      {category.name}
-                    </SelectItem>
-                  ))} */}
-                </SelectContent>
-              </Select>
-              {errorsEdit.categoryId && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.categoryId.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description (Optional)</Label>
-              <Textarea
-                id="edit-description"
-                placeholder="Enter subcategory description"
-                rows={3}
-                {...registerEdit("description")}
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                placeholder="e.g., Frontend"
+                {...registerEdit("title")}
               />
-              {errorsEdit.description && (
+              {errorsEdit.title && (
                 <p className="text-sm text-red-600">
-                  {errorsEdit.description.message}
+                  {errorsEdit.title.message}
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-icon">Icon (Optional)</Label>
+              <Input
+                id="edit-icon"
+                placeholder="e.g., <Code />"
+                {...registerEdit("icon")}
+              />
+              {errorsEdit.icon && (
+                <p className="text-sm text-red-600">
+                  {errorsEdit.icon.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <Label>Skills</Label>
+              {fieldsEdit.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Skill name (e.g., React)"
+                      {...registerEdit(`skills.${index}.name`)}
+                    />
+                  </div>
+                  <div className="w-24">
+                    <Input
+                      type="number"
+                      placeholder="%"
+                      {...registerEdit(`skills.${index}.percentage`)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeEdit(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => appendEdit({ name: "", percentage: "" })}
+              >
+                Add Skill
+              </Button>
             </div>
 
             <div className="flex items-center space-x-2 pt-4">
@@ -484,17 +429,7 @@ const Skills = () => {
                 disabled={updateMutation.isLoading}
                 className="flex-1"
               >
-                {updateMutation.isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Updating...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Save className="h-4 w-4" />
-                    <span>Update Subcategory</span>
-                  </div>
-                )}
+                {updateMutation.isLoading ? "Updating..." : "Update Skill"}
               </Button>
               <Button
                 type="button"

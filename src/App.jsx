@@ -11,7 +11,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Items from "./pages/Items";
 import Profile from "./pages/Profile";
 import "./App.css";
 import About from "./pages/About";

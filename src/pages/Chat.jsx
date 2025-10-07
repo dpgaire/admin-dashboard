@@ -1,122 +1,153 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, User } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@tanstack/react-query";
+import { Send, Loader2, Bot, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import { userQueryAPI } from "../services/api";
+import { Card, CardContent } from "@/components/ui/card";
+import { chatAPI } from "../services/api";
+import { chatSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Chat = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [messages, setMessages] = useState([]);
+  const messagesEndRef = useRef(null);
 
-  const { data: userQueryData = [], isLoading } = useQuery({
-    queryKey: ["userQuery"],
-    queryFn: async () => {
-      const response = await userQueryAPI.getAll();
-      return response?.data?.queries || [];
+  const { register, handleSubmit, reset } = useForm({
+    resolver: yupResolver(chatSchema),
+  });
+
+  const mutation = useMutation({
+    mutationFn: chatAPI.create,
+    onSuccess: (response) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "bot",
+          text: response.data.response,
+          timestamp: format(new Date(), "hh:mm a"),
+        },
+      ]);
     },
     onError: (error) => {
-      console.error("Error fetching query:", error);
-      toast.error("Failed to load query");
+      const message = error.response?.data?.message || "Failed to get response";
+      toast.error(message);
     },
   });
 
+  const onSubmit = (data) => {
+    const query = data.query.trim();
+    if (!query) return;
 
-const filteredQuery = userQueryData
-  ?.filter((user) =>
-    user.query?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    setMessages((prev) => [
+      ...prev,
+      { from: "user", text: query, timestamp: format(new Date(), "hh:mm a") },
+    ]);
 
+    mutation.mutate({ query });
+    reset();
+  };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, mutation.isLoading]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-           Chat
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Chat with your own data
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col h-[85vh]">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        Chat Assistant
+      </h1>
 
-      {/* Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search user query by name or email..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <Card className="flex-1 flex flex-col border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+        <CardContent className="flex-1 p-6 overflow-y-auto custom-scrollbar">
+          <div className="space-y-4">
+            <AnimatePresence>
+              {messages.map((message, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex flex-col ${
+                    message.from === "user" ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div className="flex items-end gap-2 max-w-[80%]">
+                    {message.from === "bot" && (
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <Bot className="w-4 h-4 text-primary" />
+                      </div>
+                    )}
+
+                    <div
+                      className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm relative ${
+                        message.from === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-none"
+                          : "bg-muted text-muted-foreground rounded-bl-none"
+                      }`}
+                    >
+                      {message.text}
+                      <span className="block text-[10px] text-gray-400 mt-1 text-right">
+                        {message.timestamp}
+                      </span>
+                    </div>
+
+                    {message.from === "user" && (
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {/* Loading indicator (assistant typing) */}
+            {mutation.isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center space-x-2 text-gray-500 text-sm animate-pulse"
+              >
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span>Assistant is typing...</span>
+              </motion.div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
         </CardContent>
-      </Card>
 
-      {/* Users List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All User Queries ({filteredQuery.length})</CardTitle>
-          <CardDescription> View user query from portfollio</CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {filteredQuery.length === 0 ? (
-            <div className="text-center py-8">
-              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm
-                  ? "No users found matching your search."
-                  : "No users found."}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredQuery.map((user, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-b last:border-0 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
-                  {/* Left - Query */}
-                  <div className="flex-1">
-                    <p className="text-gray-900 dark:text-gray-100 font-medium">
-                      {index + 1}. {user.query}
-                    </p>
-                  </div>
-
-                  {/* Right - Timestamp */}
-                  <div className="mt-2 sm:mt-0 sm:ml-4">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(user.timestamp).toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
+        <div className="p-4 border-t bg-background/70 backdrop-blur-sm sticky bottom-0">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex items-center gap-2"
+          >
+            <Input
+              {...register("query")}
+              placeholder="Type your message..."
+              autoComplete="off"
+              className="flex-1 rounded-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border-none shadow-inner focus-visible:ring-2 focus-visible:ring-primary"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={mutation.isLoading}
+              className="rounded-full shadow-md hover:scale-105 transition-transform"
+            >
+              {mutation.isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </form>
+        </div>
       </Card>
     </div>
   );

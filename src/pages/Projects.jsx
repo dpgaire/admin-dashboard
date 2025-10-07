@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -7,9 +7,7 @@ import {
   Search,
   Edit,
   Trash2,
-  Layers,
-  FolderOpen,
-  Save,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,25 +28,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { subcategoriesAPI, categoriesAPI, projectAPI } from "../services/api";
-import { subcategorySchema } from "../utils/validationSchemas";
+import { projectAPI } from "../services/api";
+import { projectSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { Switch } from "@/components/ui/switch";
 
 const Projects = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingSubcategory, setEditingSubcategory] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
 
   const { data: projectsData = [], isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
@@ -57,142 +49,115 @@ const Projects = () => {
       return response.data || [];
     },
     onError: (error) => {
-      console.error("Error fetching subcategories:", error);
-      toast.error("Failed to load subcategories");
+      console.error("Error fetching projects:", error);
+      toast.error("Failed to load projects");
     },
   });
-
-  // const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
-  //   queryKey: ["categories"],
-  //   queryFn: async () => {
-  //     const response = await categoriesAPI.getAll();
-  //     return response.data || [];
-  //   },
-  //   onError: (error) => {
-  //     console.error("Error fetching categories:", error);
-  //     toast.error("Failed to load categories");
-  //   },
-  // });
 
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
+    control: controlCreate,
     formState: { errors: errorsCreate },
     reset: resetCreate,
-    setValue: setValueCreate,
   } = useForm({
-    resolver: yupResolver(subcategorySchema),
+    resolver: yupResolver(projectSchema),
+    defaultValues: {
+      technologies: [""]
+    }
+  });
+
+  const { fields: fieldsCreate, append: appendCreate, remove: removeCreate } = useFieldArray({
+    control: controlCreate,
+    name: "technologies",
   });
 
   const {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
+    control: controlEdit,
     formState: { errors: errorsEdit },
     reset: resetEdit,
-    setValue: setValueEdit,
   } = useForm({
-    resolver: yupResolver(subcategorySchema),
+    resolver: yupResolver(projectSchema),
+  });
+
+  const { fields: fieldsEdit, append: appendEdit, remove: removeEdit } = useFieldArray({
+    control: controlEdit,
+    name: "technologies",
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => {
-      const { categoryId, ...rest } = data;
-      const transformedData = {
-        ...rest,
-        category_id: categoryId, // rename field
-      };
-
-      return subcategoriesAPI.create(transformedData);
-    },
+    mutationFn: projectAPI.create,
     onSuccess: () => {
-      toast.success("Subcategory created successfully!");
+      toast.success("Project created successfully!");
       setIsCreateModalOpen(false);
       resetCreate();
-      queryClient.invalidateQueries(["subcategories"]);
+      queryClient.invalidateQueries(["projects"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to create subcategory";
+        error.response?.data?.message || "Failed to create project";
       toast.error(message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => {
-      const { categoryId, ...rest } = data;
-      const transformedData = {
-        ...rest,
-        category_id: categoryId, // rename field
-      };
-
-      return subcategoriesAPI.update(id, transformedData);
-    },
+    mutationFn: ({ id, data }) => projectAPI.update(id, data),
     onSuccess: () => {
-      toast.success("Subcategory updated successfully!");
+      toast.success("Project updated successfully!");
       setIsEditModalOpen(false);
-      setEditingSubcategory(null);
+      setEditingProject(null);
       resetEdit();
-      queryClient.invalidateQueries(["subcategories"]);
+      queryClient.invalidateQueries(["projects"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to update subcategory";
+        error.response?.data?.message || "Failed to update project";
       toast.error(message);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: subcategoriesAPI.delete,
+    mutationFn: projectAPI.delete,
     onSuccess: () => {
-      toast.success("Subcategory deleted successfully!");
-      queryClient.invalidateQueries(["subcategories"]);
+      toast.success("Project deleted successfully!");
+      queryClient.invalidateQueries(["projects"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to delete subcategory";
+        error.response?.data?.message || "Failed to delete project";
       toast.error(message);
     },
   });
 
-  const handleCreateSubcategory = (data) => {
+  const handleCreateProject = (data) => {
     createMutation.mutate(data);
   };
 
-  // const handleEditSubcategory = (data) => {
-  //   updateMutation.mutate({ id: editingSubcategory._id, data });
-  // };
+  const handleEditProject = (data) => {
+    updateMutation.mutate({ id: editingProject._id, data });
+  };
 
-  // const handleDeleteSubcategory = (subcategoryId) => {
-  //   if (
-  //     !window.confirm(
-  //       "Are you sure you want to delete this subcategory? This will also delete all associated items."
-  //     )
-  //   ) {
-  //     return;
-  //   }
-  //   deleteMutation.mutate(subcategoryId);
-  // };
+  const handleDeleteProject = (projectId) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) {
+      return;
+    }
+    deleteMutation.mutate(projectId);
+  };
 
-  // const openEditModal = (subcategory) => {
-  //   setEditingSubcategory(subcategory);
-  //   resetEdit({
-  //     name: subcategory.name,
-  //     description: subcategory.description || "",
-  //     categoryId: subcategory.categoryId,
-  //   });
-  //   setIsEditModalOpen(true);
-  // };
-
-  // const getCategoryName = (categoryId) => {
-  //   const category = categories.find((cat) => cat._id === categoryId);
-  //   return category ? category.name : "Unknown Category";
-  // };
+  const openEditModal = (project) => {
+    setEditingProject(project);
+    resetEdit(project);
+    setIsEditModalOpen(true);
+  };
 
   const filteredProjects = projectsData.filter(
     (project) =>
       project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   if (isLoadingProjects) {
     return <LoadingSpinner />;
   }
@@ -215,100 +180,86 @@ const Projects = () => {
               <span>Add Project</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
               <DialogDescription>
-                Add a new project to organize content
+                Add a new project to your portfolio.
               </DialogDescription>
             </DialogHeader>
             <form
-              onSubmit={handleSubmitCreate(handleCreateSubcategory)}
-              className="space-y-4"
+              onSubmit={handleSubmitCreate(handleCreateProject)}
+              className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
             >
-              <div className="space-y-2">
-                <Label htmlFor="create-title">Title</Label>
-                <div className="relative">
-                  <Layers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="create-title"
-                    placeholder="Enter title"
-                    className="pl-10"
-                    {...registerCreate("title")}
-                  />
-                </div>
-                {errorsCreate.title && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.title.message}
-                  </p>
+              <Input {...registerCreate("title")} placeholder="Title" />
+              <Textarea {...registerCreate("description")} placeholder="Description" />
+              <Textarea {...registerCreate("longDescription")} placeholder="Long Description" />
+              <Input {...registerCreate("category")} placeholder="Category" />
+              <Input {...registerCreate("liveUrl")} placeholder="Live URL" />
+              <Input {...registerCreate("githubUrl")} placeholder="GitHub URL" />
+              <Input {...registerCreate("image")} placeholder="Image URL" />
+              <Textarea {...registerCreate("problem")} placeholder="Problem" />
+              <Textarea {...registerCreate("process")} placeholder="Process" />
+              <Textarea {...registerCreate("solution")} placeholder="Solution" />
+              
+              <Controller
+                name="featured"
+                control={controlCreate}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="featured"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor="featured">Featured</Label>
+                  </div>
                 )}
-              </div>
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="create-categoryId">Select Category</Label>
-                <Select
-                  onValueChange={(value) => setValueCreate("categoryId", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select parent category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* {categories.map((category) => (
-                      <SelectItem key={category._id} value={category._id}>
-                        {category.name}
-                      </SelectItem>
-                    ))} */}
-                  </SelectContent>
-                </Select>
-                {errorsCreate.categoryId && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.categoryId.message}
-                  </p>
+              <Controller
+                name="status"
+                control={controlCreate}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="status"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor="status">Active</Label>
+                  </div>
                 )}
-              </div>
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="create-description">
-                  Description (Optional)
-                </Label>
-                <Textarea
-                  id="create-description"
-                  placeholder="Enter subcategory description"
-                  rows={3}
-                  {...registerCreate("description")}
-                />
-                {errorsCreate.description && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.description.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center space-x-2 pt-4">
-                <Button
-                  type="submit"
-                  disabled={createMutation.isLoading}
-                  className="flex-1"
-                >
-                  {createMutation.isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Creating...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Save className="h-4 w-4" />
-                      <span>Create Subcategory</span>
-                    </div>
-                  )}
+              <div>
+                <Label>Technologies</Label>
+                {fieldsCreate.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2 mt-2">
+                    <Input
+                      {...registerCreate(`technologies.${index}`)}
+                      placeholder="Technology"
+                    />
+                    <Button type="button" variant="ghost" onClick={() => removeCreate(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" className="mt-2" onClick={() => appendCreate("")}>
+                  Add Technology
                 </Button>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
-                  disabled={createMutation.isLoading}
                 >
                   Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isLoading}>
+                  {createMutation.isLoading ? "Creating..." : "Create"}
                 </Button>
               </div>
             </form>
@@ -316,13 +267,12 @@ const Projects = () => {
         </Dialog>
       </div>
 
-      {/* Search */}
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search projects by name, description, or parent category..."
+              placeholder="Search projects..."
               className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -331,151 +281,33 @@ const Projects = () => {
         </CardContent>
       </Card>
 
-      {/* Subcategories List */}
       <Card>
         <CardHeader>
           <CardTitle>All Projects ({projectsData.length})</CardTitle>
-          <CardDescription>Manage projects</CardDescription>
+          <CardDescription>Manage your projects</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredProjects.length === 0 ? (
             <div className="text-center py-8">
-              <Layers className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm
-                  ? "No subcategories found matching your search."
-                  : "No subcategories found."}
-              </p>
+              <p className="text-gray-500">No projects found.</p>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => (
-                <div
-                  key={project._id}
-                  className="flex flex-col border rounded-xl bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                >
-                  {/* Image Section */}
-                  {project.image && (
-                    <div className="relative h-40 w-full">
-                      <img
-                        // src={project.image}
-                        src={"/blog-fallback.png"}
-                        alt={project.title}
-                        className="h-full w-full object-cover"
-                      />
-                      {project.featured && (
-                        <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-md shadow-md">
-                          🌟 Featured
-                        </span>
-                      )}
-                      {project.status && (
-                        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-md shadow-md">
-                          ✅ Active
-                        </span>
-                      )}
+                <div key={project._id} className="border rounded-lg overflow-hidden">
+                  <img src={project.image || '/blog-fallback.png'} alt={project.title} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg">{project.title}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{project.category}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button variant="ghost" size="sm" onClick={() => openEditModal(project)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteProject(project._id)} disabled={deleteMutation.isLoading}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
-
-                  {/* Content Section */}
-                  <div className="flex flex-col p-5 flex-1">
-                    {/* Title + Category */}
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
-                        {project.title}
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className="text-xs flex items-center"
-                      >
-                        <FolderOpen className="h-3 w-3 mr-1" />{" "}
-                        {project.category}
-                      </Badge>
-                    </div>
-
-                    {/* Short Description */}
-                    {project.description && (
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">
-                        {project.description}
-                      </p>
-                    )}
-
-                    {/* Long Description */}
-                    {project.longDescription && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
-                        {project.longDescription}
-                      </p>
-                    )}
-
-                    {/* Technologies */}
-                    {project.technologies?.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {project.technologies.map((tech, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Links */}
-                    <div className="flex items-center gap-4 mt-4 text-sm font-medium">
-                      {project.liveUrl && (
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 hover:underline"
-                        >
-                          🔗 Live Demo
-                        </a>
-                      )}
-                      {project.githubUrl && (
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-700 dark:text-gray-300 hover:underline"
-                        >
-                          💻 GitHub
-                        </a>
-                      )}
-                    </div>
-
-                    {/* Problem/Process/Solution */}
-                    {(project.problem ||
-                      project.process ||
-                      project.solution) && (
-                      <div className="mt-4 space-y-2 text-xs text-gray-600 dark:text-gray-400">
-                        {project.problem && (
-                          <p>⚠️ Problem: {project.problem}</p>
-                        )}
-                        {project.process && (
-                          <p>🔄 Process: {project.process}</p>
-                        )}
-                        {project.solution && (
-                          <p>✅ Solution: {project.solution}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-end p-3 border-t bg-gray-50 dark:bg-gray-800">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-indigo-600 transition-colors"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 transition-colors"
-                      disabled={deleteMutation.isLoading}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               ))}
@@ -484,101 +316,87 @@ const Projects = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Subcategory Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Subcategory</DialogTitle>
+            <DialogTitle>Edit Project</DialogTitle>
             <DialogDescription>
-              Update subcategory information
+              Update your project information.
             </DialogDescription>
           </DialogHeader>
           <form
-            // onSubmit={handleSubmitEdit(handleEditSubcategory)}
-            className="space-y-4"
+            onSubmit={handleSubmitEdit(handleEditProject)}
+            className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
           >
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Subcategory Name</Label>
-              <div className="relative">
-                <Layers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="edit-name"
-                  placeholder="Enter subcategory name"
-                  className="pl-10"
-                  {...registerEdit("name")}
-                />
-              </div>
-              {errorsEdit.name && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.name.message}
-                </p>
-              )}
-            </div>
+            <Input {...registerEdit("title")} placeholder="Title" />
+            <Textarea {...registerEdit("description")} placeholder="Description" />
+            <Textarea {...registerEdit("longDescription")} placeholder="Long Description" />
+            <Input {...registerEdit("category")} placeholder="Category" />
+            <Input {...registerEdit("liveUrl")} placeholder="Live URL" />
+            <Input {...registerEdit("githubUrl")} placeholder="GitHub URL" />
+            <Input {...registerEdit("image")} placeholder="Image URL" />
+            <Textarea {...registerEdit("problem")} placeholder="Problem" />
+            <Textarea {...registerEdit("process")} placeholder="Process" />
+            <Textarea {...registerEdit("solution")} placeholder="Solution" />
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-categoryId">Parent Category</Label>
-              <Select
-                onValueChange={(value) => setValueEdit("categoryId", value)}
-                defaultValue={editingSubcategory?.categoryId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select parent category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* {categories.map((category) => (
-                    <SelectItem key={category._id} value={category._id}>
-                      {category.name}
-                    </SelectItem>
-                  ))} */}
-                </SelectContent>
-              </Select>
-              {errorsEdit.categoryId && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.categoryId.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description (Optional)</Label>
-              <Textarea
-                id="edit-description"
-                placeholder="Enter subcategory description"
-                rows={3}
-                {...registerEdit("description")}
-              />
-              {errorsEdit.description && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-2 pt-4">
-              <Button
-                type="submit"
-                disabled={updateMutation.isLoading}
-                className="flex-1"
-              >
-                {updateMutation.isLoading ? (
+            <Controller
+                name="featured"
+                control={controlEdit}
+                render={({ field }) => (
                   <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Updating...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Save className="h-4 w-4" />
-                    <span>Update Subcategory</span>
+                    <Switch
+                      id="featured-edit"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor="featured-edit">Featured</Label>
                   </div>
                 )}
+              />
+
+              <Controller
+                name="status"
+                control={controlEdit}
+                render={({ field }) => (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="status-edit"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <Label htmlFor="status-edit">Active</Label>
+                  </div>
+                )}
+              />
+
+            <div>
+              <Label>Technologies</Label>
+              {fieldsEdit.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2 mt-2">
+                  <Input
+                    {...registerEdit(`technologies.${index}`)}
+                    placeholder="Technology"
+                  />
+                  <Button type="button" variant="ghost" onClick={() => removeEdit(index)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" className="mt-2" onClick={() => appendEdit("")}>
+                Add Technology
               </Button>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsEditModalOpen(false)}
-                disabled={updateMutation.isLoading}
               >
                 Cancel
+              </Button>
+              <Button type="submit" disabled={updateMutation.isLoading}>
+                {updateMutation.isLoading ? "Updating..." : "Update"}
               </Button>
             </div>
           </form>

@@ -122,3 +122,48 @@ export const itemSchema = yup.object({
     }),
 });
 
+export const skillSchema = yup.object({
+    title: yup.string().required('Title is required'),
+    icon: yup.string().optional(),
+    skills: yup.array().of(yup.object({
+        name: yup.string().required('Skill name is required'),
+        percentage: yup.number().required('Percentage is required').min(0).max(100),
+    })).optional(),
+});
+
+export const projectSchema = yup.object({
+    title: yup.string().required('Title is required'),
+    description: yup.string().optional(),
+    longDescription: yup.string().optional(),
+    category: yup.string().optional(),
+    technologies: yup.array().of(yup.string()).optional(),
+    liveUrl: yup.string().transform(v => v === '' ? null : v).url('Must be a valid URL').nullable().optional(),
+    githubUrl: yup.string().transform(v => v === '' ? null : v).url('Must be a valid URL').nullable().optional(),
+    image: yup.string().optional(),
+    featured: yup.boolean().optional(),
+    status: yup.boolean().optional(),
+    problem: yup.string().optional(),
+    process: yup.string().optional(),
+    solution: yup.string().optional(),
+});
+
+export const blogSchema = yup.object({
+    title: yup.string().required('Title is required'),
+    content: yup.string().required('Content is required'),
+    author: yup.string().optional(),
+    tags: yup.array().of(yup.string()).optional(),
+    image: yup.string().optional(),
+    featured: yup.boolean().optional(),
+    likes: yup.number().optional(),
+    excerpt: yup.string().optional(),
+    date: yup.string().optional(),
+});
+
+export const trainingSchema = yup.object({
+    text: yup.string().required('Text is required'),
+});
+
+export const chatSchema = yup.object({
+    query: yup.string().required('Query is required'),
+});
+

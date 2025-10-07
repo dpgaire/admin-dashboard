@@ -83,14 +83,6 @@ export const usersAPI = {
   delete: (id) => api.delete(`/users/${id}`),
 };
 
-// Categories API
-export const categoriesAPI = {
-  getAll: () => api.get('/categories'),
-  getById: (id) => api.get(`/categories/${id}`),
-  create: (data) => api.post('/categories', data),
-  update: (id, data) => api.put(`/categories/${id}`, data),
-  delete: (id) => api.delete(`/categories/${id}`),
-};
 
 //About API
 export const aboutAPI = {
@@ -106,6 +98,7 @@ export const projectAPI = {
   getById: (id) => api.get(`/projects/${id}`),
   create: (data) => api.post('/projects', data),
   update: (id, data) => api.put(`/projects/${id}`, data),
+  delete: (id) => api.delete(`/projects/${id}`),
 }
 //Blog API
 export const blogAPI = {
@@ -113,6 +106,7 @@ export const blogAPI = {
   getById: (id) => api.get(`/blogs/${id}`),
   create: (data) => api.post('/blogs', data),
   update: (id, data) => api.put(`/blogs/${id}`, data),
+  delete: (id) => api.delete(`/blogs/${id}`),
 }
 //Contact API
 export const contactAPI = {
@@ -126,26 +120,20 @@ export const userQueryAPI = {
 
 //Skills API
 export const skillsAPI = {
-  getAll: () => api.get('/skills')
+  getAll: () => api.get('/skills'),
+  create: (data) => api.post('/skills', data),
+  update: (id, data) => api.put(`/skills/${id}`, data),
+  delete: (id) => api.delete(`/skills/${id}`),
 }
 
-
-// Subcategories API
-export const subcategoriesAPI = {
-  getAll: () => api.get('/subcategories'),
-  getById: (id) => api.get(`/subcategories/${id}`),
-  create: (data) => api.post('/subcategories', data),
-  update: (id, data) => api.put(`/subcategories/${id}`, data),
-  delete: (id) => api.delete(`/subcategories/${id}`),
+// Training API
+export const trainingAPI = {
+  create: (data) => api.post('/train', data),
 };
 
-// Items API
-export const itemsAPI = {
-  getAll: () => api.get('/items'),
-  getById: (id) => api.get(`/items/${id}`),
-  create: (data) => api.post('/items', data),
-  update: (id, data) => api.put(`/items/${id}`, data),
-  delete: (id) => api.delete(`/items/${id}`),
+// Chat API
+export const chatAPI = {
+  create: (data) => api.post('/chat', data),
 };
 
 // Activity Log API
@@ -154,10 +142,7 @@ export const activityLogAPI = {
 };
 
 
-// Activity Log API
-export const statsAPI = {
-  getAll: () => api.get('/stats'),
-};
+
 
 export default api;
 

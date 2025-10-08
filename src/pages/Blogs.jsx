@@ -135,7 +135,7 @@ const Blogs = () => {
   };
 
   const handleEditBlog = (data) => {
-    updateMutation.mutate({ id: editingBlog._id, data });
+    updateMutation.mutate({ id: editingBlog.id, data });
   };
 
   const handleDeleteBlog = (blogId) => {
@@ -290,7 +290,7 @@ const Blogs = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredBlogs.map((blog) => (
                 <div
-                  key={blog._id}
+                  key={blog.id}
                   className="border rounded-lg overflow-hidden"
                 >
                   <img
@@ -315,7 +315,7 @@ const Blogs = () => {
                         variant="ghost"
                         size="sm"
                         className="text-red-500"
-                        onClick={() => handleDeleteBlog(blog._id)}
+                        onClick={() => handleDeleteBlog(blog.id)}
                         disabled={deleteMutation.isLoading}
                       >
                         <Trash2 className="h-4 w-4" />

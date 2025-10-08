@@ -143,7 +143,7 @@ const Skills = () => {
   };
 
   const handleEditSkill = (data) => {
-    updateMutation.mutate({ id: editingSkill._id, data });
+    updateMutation.mutate({ id: editingSkill.id, data });
   };
 
   const handleDeleteSkill = (skillId) => {
@@ -313,7 +313,7 @@ const Skills = () => {
             <div className="space-y-4">
               {filteredSkills.map((skill) => (
                 <div
-                  key={skill._id}
+                  key={skill.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
                 >
                   <div className="flex-1">
@@ -333,7 +333,7 @@ const Skills = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteSkill(skill._id)}
+                      onClick={() => handleDeleteSkill(skill.id)}
                       className="text-red-600 hover:text-red-700"
                       disabled={deleteMutation.isLoading}
                     >

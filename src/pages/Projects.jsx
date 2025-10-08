@@ -136,7 +136,7 @@ const Projects = () => {
   };
 
   const handleEditProject = (data) => {
-    updateMutation.mutate({ id: editingProject._id, data });
+    updateMutation.mutate({ id: editingProject.id, data });
   };
 
   const handleDeleteProject = (projectId) => {
@@ -294,7 +294,7 @@ const Projects = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => (
-                <div key={project._id} className="border rounded-lg overflow-hidden">
+                <div key={project.id} className="border rounded-lg overflow-hidden">
                   <img src={project.image || '/blog-fallback.png'} alt={project.title} className="w-full h-48 object-cover" />
                   <div className="p-4">
                     <h3 className="font-bold text-lg">{project.title}</h3>
@@ -304,7 +304,7 @@ const Projects = () => {
                       <Button variant="ghost" size="sm" onClick={() => openEditModal(project)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteProject(project._id)} disabled={deleteMutation.isLoading}>
+                      <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteProject(project.id)} disabled={deleteMutation.isLoading}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

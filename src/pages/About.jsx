@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { aboutAPI } from '../services/api';
-import { aboutSchema, categorySchema } from '../utils/validationSchemas';
+import { aboutSchema } from '../utils/validationSchemas';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -59,7 +59,7 @@ const About = () => {
     formState: { errors: errorsEdit },
     reset: resetEdit,
   } = useForm({
-    resolver: yupResolver(categorySchema),
+    resolver: yupResolver(aboutSchema),
   });
 
   const createMutation = useMutation({

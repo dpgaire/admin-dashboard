@@ -189,10 +189,16 @@ const Blogs = () => {
               className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
             >
               <Input {...registerCreate("title")} placeholder="Title" />
+              <Input {...registerCreate("slug")} placeholder="Slug" />
               <Textarea {...registerCreate("content")} placeholder="Content" />
               <Input {...registerCreate("author")} placeholder="Author" />
               <Input {...registerCreate("image")} placeholder="Image URL" />
               <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
+              <Input
+                type="time"
+                {...registerCreate("readTime")}
+                placeholder="Read Time"
+              />
               <Input
                 type="date"
                 {...registerCreate("date")}

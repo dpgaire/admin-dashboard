@@ -2,13 +2,7 @@ import React, { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Plus, Search, Edit, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,13 +57,26 @@ const Projects = () => {
   } = useForm({
     resolver: yupResolver(projectSchema),
     defaultValues: {
-      technologies: [""]
-    }
+      technologies: [""],
+    },
   });
 
-  const { fields: fieldsCreate, append: appendCreate, remove: removeCreate } = useFieldArray({
+  const {
+    fields: fieldsCreate,
+    append: appendCreate,
+    remove: removeCreate,
+  } = useFieldArray({
     control: controlCreate,
     name: "technologies",
+  });
+
+    const {
+    fields: fieldsCreateScreenshots,
+    append: appendCreateScreenshots,
+    remove: removeCreateScreenshots,
+  } = useFieldArray({
+    control: controlCreate,
+    name: "screenshots",
   });
 
   const {
@@ -82,9 +89,23 @@ const Projects = () => {
     resolver: yupResolver(projectSchema),
   });
 
-  const { fields: fieldsEdit, append: appendEdit, remove: removeEdit } = useFieldArray({
+  const {
+    fields: fieldsEdit,
+    append: appendEdit,
+    remove: removeEdit,
+  } = useFieldArray({
     control: controlEdit,
     name: "technologies",
+  });
+
+
+    const {
+    fields: fieldsEditScreenshots,
+    append: appendEditScreenshots,
+    remove: removeEditScreenshots,
+  } = useFieldArray({
+    control: controlEdit,
+    name: "screenshots",
   });
 
   const createMutation = useMutation({
@@ -161,7 +182,6 @@ const Projects = () => {
   if (isLoadingProjects) {
     return <LoadingSpinner />;
   }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -192,16 +212,28 @@ const Projects = () => {
               className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
             >
               <Input {...registerCreate("title")} placeholder="Title" />
-              <Textarea {...registerCreate("description")} placeholder="Description" />
-              <Textarea {...registerCreate("longDescription")} placeholder="Long Description" />
+              <Textarea
+                {...registerCreate("description")}
+                placeholder="Description"
+              />
+              <Textarea
+                {...registerCreate("longDescription")}
+                placeholder="Long Description"
+              />
               <Input {...registerCreate("category")} placeholder="Category" />
               <Input {...registerCreate("liveUrl")} placeholder="Live URL" />
-              <Input {...registerCreate("githubUrl")} placeholder="GitHub URL" />
+              <Input
+                {...registerCreate("githubUrl")}
+                placeholder="GitHub URL"
+              />
               <Input {...registerCreate("image")} placeholder="Image URL" />
               <Textarea {...registerCreate("problem")} placeholder="Problem" />
               <Textarea {...registerCreate("process")} placeholder="Process" />
-              <Textarea {...registerCreate("solution")} placeholder="Solution" />
-              
+              <Textarea
+                {...registerCreate("solution")}
+                placeholder="Solution"
+              />
+
               <Controller
                 name="featured"
                 control={controlCreate}
@@ -231,7 +263,32 @@ const Projects = () => {
                   </div>
                 )}
               />
-
+              <div>
+                <Label>Screenshots</Label>
+                {fieldsCreateScreenshots.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2 mt-2">
+                    <Input
+                      {...registerCreate(`screenshots.${index}`)}
+                      placeholder="Screenshots"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => removeCreateScreenshots(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => appendCreateScreenshots("")}
+                >
+                  Add Screeshots
+                </Button>
+              </div>
               <div>
                 <Label>Technologies</Label>
                 {fieldsCreate.map((field, index) => (
@@ -240,12 +297,21 @@ const Projects = () => {
                       {...registerCreate(`technologies.${index}`)}
                       placeholder="Technology"
                     />
-                    <Button type="button" variant="ghost" onClick={() => removeCreate(index)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => removeCreate(index)}
+                    >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button type="button" variant="outline" className="mt-2" onClick={() => appendCreate("")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => appendCreate("")}
+                >
                   Add Technology
                 </Button>
               </div>
@@ -294,17 +360,38 @@ const Projects = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => (
-                <div key={project.id} className="border rounded-lg overflow-hidden">
-                  <img src={project.image || '/blog-fallback.png'} alt={project.title} className="w-full h-48 object-cover" />
+                <div
+                  key={project.id}
+                  className="border rounded-lg overflow-hidden"
+                >
+                  <img
+                    src={project.image || "/blog-fallback.png"}
+                    alt={project.title}
+                    className="w-full h-48 object-cover"
+                  />
                   <div className="p-4">
                     <h3 className="font-bold text-lg">{project.title}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{project.category}</p>
-                    <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
+                    <p className="text-sm text-gray-500 mb-2">
+                      {project.category}
+                    </p>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {project.description}
+                    </p>
                     <div className="flex justify-end gap-2 mt-4">
-                      <Button variant="ghost" size="sm" onClick={() => openEditModal(project)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditModal(project)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDeleteProject(project.id)} disabled={deleteMutation.isLoading}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500"
+                        onClick={() => handleDeleteProject(project.id)}
+                        disabled={deleteMutation.isLoading}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -326,11 +413,25 @@ const Projects = () => {
           </DialogHeader>
           <form
             onSubmit={handleSubmitEdit(handleEditProject)}
+  //            onSubmit={handleSubmitEdit(
+  //   (data) => {
+  //     console.log("✅ Valid form data:", data);
+  //   },
+  //   (errors) => {
+  //     console.error("❌ Validation errors:", errors);
+  //   }
+  // )}
             className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
           >
             <Input {...registerEdit("title")} placeholder="Title" />
-            <Textarea {...registerEdit("description")} placeholder="Description" />
-            <Textarea {...registerEdit("longDescription")} placeholder="Long Description" />
+            <Textarea
+              {...registerEdit("description")}
+              placeholder="Description"
+            />
+            <Textarea
+              {...registerEdit("longDescription")}
+              placeholder="Long Description"
+            />
             <Input {...registerEdit("category")} placeholder="Category" />
             <Input {...registerEdit("liveUrl")} placeholder="Live URL" />
             <Input {...registerEdit("githubUrl")} placeholder="GitHub URL" />
@@ -340,35 +441,60 @@ const Projects = () => {
             <Textarea {...registerEdit("solution")} placeholder="Solution" />
 
             <Controller
-                name="featured"
-                control={controlEdit}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured-edit"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="featured-edit">Featured</Label>
-                  </div>
-                )}
-              />
+              name="featured"
+              control={controlEdit}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="featured-edit"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <Label htmlFor="featured-edit">Featured</Label>
+                </div>
+              )}
+            />
 
-              <Controller
-                name="status"
-                control={controlEdit}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="status-edit"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+            <Controller
+              name="status"
+              control={controlEdit}
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="status-edit"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <Label htmlFor="status-edit">Active</Label>
+                </div>
+              )}
+            />
+            <div>
+                <Label>Screenshots</Label>
+                {fieldsEditScreenshots.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2 mt-2">
+                    <Input
+                      {...registerEdit(`screenshots.${index}`)}
+                      placeholder="Screenshots"
                     />
-                    <Label htmlFor="status-edit">Active</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => removeEditScreenshots(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
-              />
-
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => appendEditScreenshots("")}
+                >
+                  Add Screeshots
+                </Button>
+              </div>
             <div>
               <Label>Technologies</Label>
               {fieldsEdit.map((field, index) => (
@@ -377,12 +503,21 @@ const Projects = () => {
                     {...registerEdit(`technologies.${index}`)}
                     placeholder="Technology"
                   />
-                  <Button type="button" variant="ghost" onClick={() => removeEdit(index)}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => removeEdit(index)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
-              <Button type="button" variant="outline" className="mt-2" onClick={() => appendEdit("")}>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2"
+                onClick={() => appendEdit("")}
+              >
                 Add Technology
               </Button>
             </div>

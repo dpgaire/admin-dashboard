@@ -1,11 +1,7 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
 const API_BASE_URL = 'https://ai-chatbot-api-ten.vercel.app/api';
-// const API_BASE_URL = 'http://localhost:3000/api';
 
-
-// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -13,21 +9,14 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
   }
-);
+};
 
-// Response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -39,7 +28,7 @@ api.interceptors.response.use(
         const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, { refreshToken });
         const { accessToken } = response.data;
         localStorage.setItem('token', accessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        setAuthToken(accessToken);
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('token');
@@ -53,14 +42,8 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-  },
   refreshToken: () => api.post('/auth/refresh-token'),
 };
 

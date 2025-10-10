@@ -26,11 +26,9 @@ const About = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingAbout, setEditingAbout] = useState(null);
 
   // let isLoading = false
-
-
 
   const { data: aboutData = [], isLoading } = useQuery({
     queryKey: ['about'],
@@ -81,7 +79,7 @@ const About = () => {
     onSuccess: () => {
       toast.success('Category updated successfully!');
       setIsEditModalOpen(false);
-      setEditingCategory(null);
+      setEditingAbout(null);
       resetEdit();
       queryClient.invalidateQueries(['categories']);
     },
@@ -91,41 +89,41 @@ const About = () => {
     }
   });
 
-  // const deleteMutation = useMutation({
-  //   mutationFn: aboutAPI.delete,
-  //   onSuccess: () => {
-  //     toast.success('Category deleted successfully!');
-  //     queryClient.invalidateQueries(['about']);
-  //   },
-  //   onError: (error) => {
-  //     const message = error.response?.data?.message || 'Failed to delete category';
-  //     toast.error(message);
-  //   }
-  // });
+  const deleteMutation = useMutation({
+    mutationFn: aboutAPI.delete,
+    onSuccess: () => {
+      toast.success('Category deleted successfully!');
+      queryClient.invalidateQueries(['about']);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to delete category';
+      toast.error(message);
+    }
+  });
 
-  const handleCreateCategory = (data) => {
+  const handleCreateAbout = (data) => {
     createMutation.mutate(data);
   };
 
-  const handleEditCategory = (data) => {
-    updateMutation.mutate({ id: editingCategory._id, data });
+  const handleEditAbout = (data) => {
+    updateMutation.mutate({ id: editingAbout.id, data });
   };
 
-  // const handleDeleteCategory = (categoryId) => {
-  //   if (!window.confirm('Are you sure you want to delete this category? This will also delete all associated subcategories and items.')) {
-  //     return;
-  //   }
-  //   deleteMutation.mutate(categoryId);
-  // };
+  const handleDeleteAbout = (aboutId) => {
+    if (!window.confirm('Are you sure you want to delete this item? This will also delete all associated subcategories and items.')) {
+      return;
+    }
+    deleteMutation.mutate(aboutId);
+  };
 
-  // const openEditModal = (category) => {
-  //   setEditingCategory(category);
-  //   resetEdit({
-  //     name: category.name,
-  //     description: category.description || '',
-  //   });
-  //   setIsEditModalOpen(true);
-  // };
+  const openEditModal = (about) => {
+    setEditingAbout(about);
+    resetEdit({
+      title: about.title,
+      description: about.description || '',
+    });
+    setIsEditModalOpen(true);
+  };
 
   const filteredAboutData = aboutData.filter(about =>
     about.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,7 +158,7 @@ const About = () => {
                 Add a new about to organize content
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmitCreate(handleCreateCategory)} className="space-y-4">
+            <form onSubmit={handleSubmitCreate(handleCreateAbout)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="create-title">Title</Label>
                 <div className="relative">
@@ -266,7 +264,7 @@ const About = () => {
                       </p>
                     </div>
                   </div>
-                  {/* <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -277,13 +275,13 @@ const About = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteCategory(item.id)}
+                      onClick={() => handleDeleteAbout(item.id)}
                       className="text-red-600 hover:text-red-700"
                       disabled={deleteMutation.isLoading}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div> */}
+                  </div>
                 </div>
               ))}
              
@@ -296,21 +294,21 @@ const About = () => {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
+            <DialogTitle>Edit About</DialogTitle>
             <DialogDescription>
-              Update category information
+              Update about information
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmitEdit(handleEditCategory)} className="space-y-4">
+          <form onSubmit={handleSubmitEdit(handleEditAbout)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Category Name</Label>
+              <Label htmlFor="edit-name">Title</Label>
               <div className="relative">
                 <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="edit-name"
-                  placeholder="Enter category name"
+                  placeholder="Enter title"
                   className="pl-10"
-                  {...registerEdit('name')}
+                  {...registerEdit('title')}
                 />
               </div>
               {errorsEdit.name && (
@@ -322,7 +320,7 @@ const About = () => {
               <Label htmlFor="edit-description">Description (Optional)</Label>
               <Textarea
                 id="edit-description"
-                placeholder="Enter category description"
+                placeholder="Enter  description"
                 rows={3}
                 {...registerEdit('description')}
               />
@@ -341,7 +339,7 @@ const About = () => {
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Save className="h-4 w-4" />
-                    <span>Update Category</span>
+                    <span>Update About</span>
                   </div>
                 )}
               </Button>

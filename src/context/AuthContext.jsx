@@ -64,6 +64,8 @@ export const AuthProvider = ({ children }) => {
     authAPI.logout();
     setUser(null);
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("accessToken");
+
     toast.success("Logged out successfully");
   };
 

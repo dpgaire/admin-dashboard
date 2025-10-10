@@ -317,7 +317,7 @@ const Skills = () => {
                   className="flex items-center justify-between p-4 border rounded-lg"
                 >
                   <div className="flex-1">
-                    <h3 className="font-medium">{skill.title}</h3>
+                    <h3 className="font-medium">{skill.icon}{' '}{skill.title}</h3>
                     <div className="text-sm text-gray-500">
                       {skill.skills.map((s) => s.name).join(", ")}
                     </div>

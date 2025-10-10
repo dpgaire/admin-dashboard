@@ -25,6 +25,7 @@ import Skills from "./pages/Skills";
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
   const { isAuthenticated } = useAuth();
+  console.log('isAuthenticated',isAuthenticated ? 'true' : 'false')
 
   return (
     <Routes>

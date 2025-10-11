@@ -44,6 +44,7 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
+  logut: () => api.post('/auth/logout'),
   refreshToken: () => api.post('/auth/refresh-token'),
 };
 
@@ -109,6 +110,23 @@ export const skillsAPI = {
   delete: (id) => api.delete(`/skills/${id}`),
 }
 
+// Notes API
+export const notesAPI = {
+  getAll: () => api.get('/notes'),
+  create: (data) => api.post('/notes', data),
+  update: (id, data) => api.put(`/notes/${id}`, data),
+  delete: (id) => api.delete(`/notes/${id}`),
+};
+
+// Quick Links API
+export const quickLinksAPI = {
+  getAll: () => api.get('/quicklinks'),
+  create: (data) => api.post('/quicklinks', data),
+  update: (id, data) => api.put(`/quicklinks/${id}`, data),
+  delete: (id) => api.delete(`/quicklinks/${id}`),
+};
+
+
 // Training API
 export const trainingAPI = {
   create: (data) => api.post('/train', data),
@@ -122,6 +140,10 @@ export const chatAPI = {
 // Activity Log API
 export const activityLogAPI = {
   getAll: () => api.get('/activity-logs'),
+};
+
+export const statsAPI = {
+  getAll: () => api.get('/stats'),
 };
 
 export default api;

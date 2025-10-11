@@ -21,6 +21,8 @@ import Training from "./pages/Training";
 import Blogs from "./pages/Blogs";
 import Chat from "./pages/Chat";
 import Skills from "./pages/Skills";
+import Notes from "./pages/Notes";
+import QuickLinks from "./pages/QuickLinks";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -50,6 +52,8 @@ const AuthenticatedApp = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/skills" element={<Skills />} />
+                <Route path="/notes" element={<Notes />} />
+                <Route path="/quicklinks" element={<QuickLinks />} />
 
 
                 <Route

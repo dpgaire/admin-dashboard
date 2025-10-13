@@ -129,7 +129,11 @@ export const quickLinksAPI = {
 
 // Training API
 export const trainingAPI = {
+  getAll: () => api.get('/train'),
+  getById: (id) => api.get(`/train/${id}`),
   create: (data) => api.post('/train', data),
+  update: (id, data) => api.put(`/train/${id}`, data),
+  delete: (id) => api.delete(`/train/${id}`),
 };
 
 // Chat API

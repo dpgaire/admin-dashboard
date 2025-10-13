@@ -122,7 +122,10 @@ export const blogSchema = yup.object({
 });
 
 export const trainingSchema = yup.object({
-  text: yup.string().required("Text is required"),
+  category: yup.string().required("Category is required"),
+  title: yup.string().required("Title is required"),
+  content: yup.string().required("Content is required"),
+  tags: yup.array().of(yup.string()).optional(),
 });
 
 export const chatSchema = yup.object({

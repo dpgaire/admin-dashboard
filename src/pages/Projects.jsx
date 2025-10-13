@@ -412,15 +412,6 @@ const Projects = () => {
             </DialogDescription>
           </DialogHeader>
           <form
-            onSubmit={handleSubmitEdit(handleEditProject)}
-  //            onSubmit={handleSubmitEdit(
-  //   (data) => {
-  //     console.log("✅ Valid form data:", data);
-  //   },
-  //   (errors) => {
-  //     console.error("❌ Validation errors:", errors);
-  //   }
-  // )}
             className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
           >
             <Input {...registerEdit("title")} placeholder="Title" />

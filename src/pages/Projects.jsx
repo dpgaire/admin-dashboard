@@ -413,6 +413,7 @@ const Projects = () => {
           </DialogHeader>
           <form
             className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
+            onSubmit={handleSubmitEdit(handleEditProject)}
           >
             <Input {...registerEdit("title")} placeholder="Title" />
             <Textarea

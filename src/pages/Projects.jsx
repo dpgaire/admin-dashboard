@@ -23,11 +23,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { projectAPI } from "../services/api";
 import { projectSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Switch } from "@/components/ui/switch";
+
+const categoryOptions = [
+  { value: "ai", label: "AI/ML" },
+  { value: "tools", label: "Tools" },
+  { value: "productivity", label: "Productivity" },
+  { value: "graphics", label: "Graphics" },
+  { value: "web", label: "Web Development" },
+  { value: "mobile", label: "Mobile Development" },
+];
 
 const Projects = () => {
   const queryClient = useQueryClient();
@@ -220,7 +236,27 @@ const Projects = () => {
                 {...registerCreate("longDescription")}
                 placeholder="Long Description"
               />
-              <Input {...registerCreate("category")} placeholder="Category" />
+                            <Controller
+                name="category"
+                control={controlCreate}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               <Input {...registerCreate("liveUrl")} placeholder="Live URL" />
               <Input
                 {...registerCreate("githubUrl")}
@@ -424,7 +460,27 @@ const Projects = () => {
               {...registerEdit("longDescription")}
               placeholder="Long Description"
             />
-            <Input {...registerEdit("category")} placeholder="Category" />
+                        <Controller
+              name="category"
+              control={controlEdit}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             <Input {...registerEdit("liveUrl")} placeholder="Live URL" />
             <Input {...registerEdit("githubUrl")} placeholder="GitHub URL" />
             <Input {...registerEdit("image")} placeholder="Image URL" />

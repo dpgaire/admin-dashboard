@@ -6,15 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash } from "lucide-react";
+import { Plus, Edit, Trash, Copy } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Notes = () => {
@@ -85,6 +85,16 @@ const Notes = () => {
     }
   };
 
+  // ✅ Copy handler
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy text",err);
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -93,7 +103,7 @@ const Notes = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold ">Notes</h1>
+          <h1 className="text-3xl font-bold">Notes</h1>
           <p className="mt-2">Create and manage your notes</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -109,14 +119,27 @@ const Notes = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="title">Title</label>
-                <Input id="title" name="title" defaultValue={editingNote?.title || ""} required />
+                <Input
+                  id="title"
+                  name="title"
+                  defaultValue={editingNote?.title || ""}
+                  required
+                />
               </div>
               <div>
                 <label htmlFor="description">Description</label>
-                <Textarea id="description" name="content" defaultValue={editingNote?.content || ""} required />
+                <Textarea
+                  id="description"
+                  name="content"
+                  defaultValue={editingNote?.content || ""}
+                  required
+                />
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={createNote.isLoading || updateNote.isLoading}>
+                <Button
+                  type="submit"
+                  disabled={createNote.isLoading || updateNote.isLoading}
+                >
                   {editingNote ? "Update" : "Create"}
                 </Button>
               </DialogFooter>
@@ -125,22 +148,41 @@ const Notes = () => {
         </Dialog>
       </div>
 
+      {/* Notes Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {notes.map((note) => (
           <Card key={note.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{note.title}</CardTitle>
               <div className="flex space-x-2">
-                <Button variant="ghost" size="sm" onClick={() => { setEditingNote(note); setOpen(true); }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditingNote(note);
+                    setOpen(true);
+                  }}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => deleteNote.mutate(note.id)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deleteNote.mutate(note.id)}
+                >
                   <Trash className="h-4 w-4" />
                 </Button>
+                 <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleCopy(note.content)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <p>{note.content}</p>
+            <CardContent className="relative">
+              <p className="pr-8">{note.content}</p>
             </CardContent>
           </Card>
         ))}

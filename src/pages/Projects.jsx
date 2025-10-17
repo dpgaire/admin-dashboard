@@ -86,7 +86,7 @@ const Projects = () => {
     name: "technologies",
   });
 
-    const {
+  const {
     fields: fieldsCreateScreenshots,
     append: appendCreateScreenshots,
     remove: removeCreateScreenshots,
@@ -114,8 +114,7 @@ const Projects = () => {
     name: "technologies",
   });
 
-
-    const {
+  const {
     fields: fieldsEditScreenshots,
     append: appendEditScreenshots,
     remove: removeEditScreenshots,
@@ -236,7 +235,7 @@ const Projects = () => {
                 {...registerCreate("longDescription")}
                 placeholder="Long Description"
               />
-                            <Controller
+              <Controller
                 name="category"
                 control={controlCreate}
                 render={({ field }) => (
@@ -460,7 +459,7 @@ const Projects = () => {
               {...registerEdit("longDescription")}
               placeholder="Long Description"
             />
-                        <Controller
+            <Controller
               name="category"
               control={controlEdit}
               render={({ field }) => (
@@ -518,31 +517,31 @@ const Projects = () => {
               )}
             />
             <div>
-                <Label>Screenshots</Label>
-                {fieldsEditScreenshots.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mt-2">
-                    <Input
-                      {...registerEdit(`screenshots.${index}`)}
-                      placeholder="Screenshots"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeEditScreenshots(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => appendEditScreenshots("")}
-                >
-                  Add Screeshots
-                </Button>
-              </div>
+              <Label>Screenshots</Label>
+              {fieldsEditScreenshots.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2 mt-2">
+                  <Input
+                    {...registerEdit(`screenshots.${index}`)}
+                    placeholder="Screenshots"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => removeEditScreenshots(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2"
+                onClick={() => appendEditScreenshots("")}
+              >
+                Add Screeshots
+              </Button>
+            </div>
             <div>
               <Label>Technologies</Label>
               {fieldsEdit.map((field, index) => (

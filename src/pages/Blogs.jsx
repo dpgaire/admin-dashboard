@@ -15,6 +15,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,6 +35,15 @@ import { blogSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Switch } from "@/components/ui/switch";
+
+const categoryOptions = [
+  { value: "ai", label: "AI/ML & Automation" },
+  { value: "career", label: "Career" },
+  { value: "open-source", label: "Open Source" },
+  { value: "mindset", label: "Mindset & Productive" },
+  { value: "web", label: "Web Development" },
+  { value: "mobile", label: "Mobile Development" },
+];
 
 const Blogs = () => {
   const queryClient = useQueryClient();
@@ -190,6 +206,27 @@ const Blogs = () => {
             >
               <Input {...registerCreate("title")} placeholder="Title" />
               <Input {...registerCreate("slug")} placeholder="Slug" />
+              <Controller
+                              name="category"
+                              control={controlCreate}
+                              render={({ field }) => (
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select a category" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {categoryOptions.map((option) => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
               <Textarea {...registerCreate("content")} placeholder="Content" />
               <Input {...registerCreate("author")} placeholder="Author" />
               <Input {...registerCreate("image")} placeholder="Image URL" />
@@ -310,23 +347,29 @@ const Blogs = () => {
                     <p className="text-sm text-gray-600 line-clamp-2">
                       {blog.content}
                     </p>
-                    <div className="flex justify-end gap-2 mt-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditModal(blog)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500"
-                        onClick={() => handleDeleteBlog(blog.id)}
-                        disabled={deleteMutation.isLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+
+                    <div className="flex justify-between items-center font-semibold gap-2 mt-4">
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {blog?.category}
+                      </p>
+                      <div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditModal(blog)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500"
+                          onClick={() => handleDeleteBlog(blog.id)}
+                          disabled={deleteMutation.isLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -347,6 +390,27 @@ const Blogs = () => {
             className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
           >
             <Input {...registerEdit("title")} placeholder="Title" />
+            <Controller
+                          name="category"
+                          control={controlEdit}
+                          render={({ field }) => (
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categoryOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
             <Textarea {...registerEdit("content")} placeholder="Content" />
             <Input {...registerEdit("author")} placeholder="Author" />
             <Input {...registerEdit("image")} placeholder="Image URL" />

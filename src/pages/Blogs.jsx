@@ -193,6 +193,7 @@ const Blogs = () => {
               <Textarea {...registerCreate("content")} placeholder="Content" />
               <Input {...registerCreate("author")} placeholder="Author" />
               <Input {...registerCreate("image")} placeholder="Image URL" />
+              <Input {...registerCreate("category")} placeholder="Category" />
               <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
               <Input
                 type="time"

@@ -35,6 +35,7 @@ import { blogSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Switch } from "@/components/ui/switch";
+import BlogDetailModal from "@/components/BlogDetailModal";
 
 const categoryOptions = [
   { value: "ai", label: "AI/ML & Automation" },
@@ -230,7 +231,6 @@ const Blogs = () => {
               <Textarea {...registerCreate("content")} placeholder="Content" />
               <Input {...registerCreate("author")} placeholder="Author" />
               <Input {...registerCreate("image")} placeholder="Image URL" />
-              <Input {...registerCreate("category")} placeholder="Category" />
               <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
               <Input
                 type="time"
@@ -349,9 +349,7 @@ const Blogs = () => {
                     </p>
 
                     <div className="flex justify-between items-center font-semibold gap-2 mt-4">
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {blog?.category}
-                      </p>
+                        <BlogDetailModal blog={blog} />
                       <div>
                         <Button
                           variant="ghost"

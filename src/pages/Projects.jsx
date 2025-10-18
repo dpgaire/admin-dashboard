@@ -35,6 +35,7 @@ import { projectSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Switch } from "@/components/ui/switch";
+import ProjectDetailModal from "@/components/ProjectDetailModal";
 
 const categoryOptions = [
   { value: "ai", label: "AI/ML" },
@@ -413,9 +414,11 @@ const Projects = () => {
                       {project.description}
                     </p>
                     <div className="flex justify-end gap-2 mt-4">
+                      <ProjectDetailModal project={project} />
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="cursor-pointer"
                         onClick={() => openEditModal(project)}
                       >
                         <Edit className="h-4 w-4" />
@@ -423,7 +426,7 @@ const Projects = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-500"
+                        className="text-red-500 cursor-pointer"
                         onClick={() => handleDeleteProject(project.id)}
                         disabled={deleteMutation.isLoading}
                       >
@@ -579,7 +582,7 @@ const Projects = () => {
               </Button>
               <Button type="submit" disabled={updateMutation.isLoading}>
                 {updateMutation.isLoading ? "Updating..." : "Update"}
-              </Button>
+              </Button>.
             </div>
           </form>
         </DialogContent>
@@ -589,3 +592,4 @@ const Projects = () => {
 };
 
 export default Projects;
+

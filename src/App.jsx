@@ -23,6 +23,7 @@ import Chat from "./pages/Chat";
 import Skills from "./pages/Skills";
 import Notes from "./pages/Notes";
 import QuickLinks from "./pages/QuickLinks";
+import ChatUser from "./pages/ChatUser";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
                 <Route path="/skills" element={<Skills />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/quicklinks" element={<QuickLinks />} />
+                <Route path="/chat-user" element={<ChatUser />} />
 
 
                 <Route

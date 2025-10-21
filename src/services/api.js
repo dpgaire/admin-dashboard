@@ -17,6 +17,20 @@ export const setAuthToken = (token) => {
   }
 };
 
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -28,7 +42,7 @@ api.interceptors.response.use(
         const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, { refreshToken });
         const { accessToken } = response.data;
         localStorage.setItem('token', accessToken);
-        setAuthToken(accessToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('token');

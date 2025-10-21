@@ -150,5 +150,10 @@ export const statsAPI = {
   getAll: () => api.get('/stats'),
 };
 
+// Chat User API
+export const chatUserAPI = {
+  getAll: () => api.get('/chat/users'),
+};
+
 export default api;
 

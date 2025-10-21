@@ -48,6 +48,7 @@ const navigation = [
   { name: "Skills", href: "/skills", icon: Layers },
   { name: "Queries", href: "/queries", icon: MessageSquare },
   { name: "Chat", href: "/chat", icon: MessageCircle },
+  { name: "Chat Users", href: "/chat-user", icon: Users },
   { name: "Training", href: "/training", icon: Dumbbell },
   { name: "Contact", href: "/contact", icon: Phone },
 ];

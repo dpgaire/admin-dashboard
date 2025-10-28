@@ -13,13 +13,14 @@ import {
   DialogTrigger, 
   DialogFooter 
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit, Trash, Link as LinkIcon, Search } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const QuickLinks = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: quickLinks, isLoading } = useQuery({
     queryKey: ["quickLinks"],
@@ -84,6 +85,10 @@ const QuickLinks = () => {
     }
   };
 
+  const filteredQuickLinks = quickLinks?.filter((link) =>
+    link.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -124,29 +129,44 @@ const QuickLinks = () => {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {quickLinks.map((link) => (
-          <Card key={link.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{link.title}</CardTitle>
-              <div className="flex space-x-2">
-                <Button variant="ghost" size="sm" onClick={() => { setEditingLink(link); setOpen(true); }}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => deleteQuickLink.mutate(link.id)}>
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <a href={link.link} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-500 hover:underline">
-                <LinkIcon className="mr-2 h-4 w-4" />
-                {link.link}
-              </a>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by title..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {filteredQuickLinks?.map((link) => (
+              <li key={link.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+                <div className="flex items-center space-x-4">
+                  <LinkIcon className="h-5 w-5 text-gray-500" />
+                  <div className="flex flex-col">
+                  <a href={link.link} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-500 hover:underline">
+                    {link.title}
+                  </a>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{link.link}</p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingLink(link); setOpen(true); }}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => deleteQuickLink.mutate(link.id)}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 };

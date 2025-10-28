@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, User } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Search, User, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -9,13 +11,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { userQueryAPI } from "../services/api";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Queries = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedQueries, setSelectedQueries] = useState([]);
 
   const { data: userQueryData = [], isLoading } = useQuery({
     queryKey: ["userQuery"],
@@ -29,13 +43,46 @@ const Queries = () => {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: userQueryAPI.delete,
+    onSuccess: () => {
+      toast.success("Query deleted successfully!");
+      queryClient.invalidateQueries(["userQuery"]);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || "Failed to delete query";
+      toast.error(message);
+    },
+  });
 
-const filteredQuery = userQueryData
-  ?.filter((user) =>
-    user.query?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(selectedQueries.map((id) => deleteMutation.mutateAsync(id)));
+      setSelectedQueries([]);
+    } catch (error) {
+      console.error("Error deleting selected queries:", error);
+    }
+  };
 
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedQueries(filteredQuery.map((q) => q.id));
+    } else {
+      setSelectedQueries([]);
+    }
+  };
+
+  const handleSelectQuery = (id) => {
+    setSelectedQueries((prev) =>
+      prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, id]
+    );
+  };
+
+  const filteredQuery = userQueryData
+    ?.filter((user) =>
+      user.query?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -52,6 +99,31 @@ const filteredQuery = userQueryData
             View user query from portfollio
           </p>
         </div>
+        {selectedQueries.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Selected ({selectedQueries.length})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  selected queries.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteSelected}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
 
       {/* Search */}
@@ -72,8 +144,20 @@ const filteredQuery = userQueryData
       {/* Users List */}
       <Card>
         <CardHeader>
-          <CardTitle>All User Queries ({filteredQuery.length})</CardTitle>
-          <CardDescription> View user query from portfollio</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>All User Queries ({filteredQuery.length})</CardTitle>
+              <CardDescription> View user query from portfollio</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="select-all"
+                onCheckedChange={handleSelectAll}
+                checked={selectedQueries.length === filteredQuery.length && filteredQuery.length > 0}
+              />
+              <label htmlFor="select-all">Select All</label>
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -90,11 +174,16 @@ const filteredQuery = userQueryData
             <div className="space-y-4">
               {filteredQuery.map((user, index) => (
                 <div
-                  key={index}
+                  key={user.id}
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-b last:border-0 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  {/* Left - Query */}
-                  <div className="flex-1">
+                  <div className="flex items-center flex-1">
+                    <Checkbox
+                      id={user.id}
+                      className="mr-4"
+                      onCheckedChange={() => handleSelectQuery(user.id)}
+                      checked={selectedQueries.includes(user.id)}
+                    />
                     <p className="text-gray-900 dark:text-gray-100 font-medium">
                       {index + 1}. {user.query}
                     </p>

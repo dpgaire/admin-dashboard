@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -168,6 +168,38 @@ const Blogs = () => {
     setIsEditModalOpen(true);
   };
 
+  const handleExport = () => {
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(blogData, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "blogs.json";
+    link.click();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            importedData.forEach((blog) => {
+              createMutation.mutate(blog);
+            });
+          } else {
+            toast.error("Invalid JSON format. Expected an array of blogs.");
+          }
+        } catch (error) {
+          toast.error("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const filteredBlogs = blogData.filter(
     (blog) =>
       blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,121 +221,138 @@ const Blogs = () => {
             Manage your blogs
           </p>
         </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Add Blog</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Blog</DialogTitle>
-              <DialogDescription>Write a new blog post.</DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={handleSubmitCreate(handleCreateBlog)}
-              className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
-            >
-              <Input {...registerCreate("title")} placeholder="Title" />
-              <Input {...registerCreate("slug")} placeholder="Slug" />
-              <Controller
-                              name="category"
-                              control={controlCreate}
-                              render={({ field }) => (
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a category" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {categoryOptions.map((option) => (
-                                      <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            />
-              <Textarea {...registerCreate("content")} placeholder="Content" />
-              <Input {...registerCreate("author")} placeholder="Author" />
-              <Input {...registerCreate("image")} placeholder="Image URL" />
-              <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
-              <Input
-                type="time"
-                {...registerCreate("readTime")}
-                placeholder="Read Time"
+        <div className="flex space-x-2">
+          <Button onClick={handleExport}>
+            <Upload className="mr-2 h-4 w-4" /> Export JSON
+          </Button>
+          <Button asChild>
+            <label htmlFor="import-json">
+              <Upload className="mr-2 h-4 w-4" /> Import JSON
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImport}
               />
-              <Input
-                type="date"
-                {...registerCreate("date")}
-                placeholder="Date"
-              />
-              <Input
-                type="number"
-                {...registerCreate("likes")}
-                placeholder="Likes"
-              />
-              <Controller
-                name="featured"
-                control={controlCreate}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured-create"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="featured-create">Featured</Label>
-                  </div>
-                )}
-              />
-
-              <div>
-                <Label>Tags</Label>
-                {fieldsCreate.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mt-2">
-                    <Input
-                      {...registerCreate(`tags.${index}`)}
-                      placeholder="Tag"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeCreate(index)}
+            </label>
+          </Button>
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>Add Blog</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Blog</DialogTitle>
+                <DialogDescription>Write a new blog post.</DialogDescription>
+              </DialogHeader>
+              <form
+                onSubmit={handleSubmitCreate(handleCreateBlog)}
+                className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
+              >
+                <Input {...registerCreate("title")} placeholder="Title" />
+                <Input {...registerCreate("slug")} placeholder="Slug" />
+                <Controller
+                  name="category"
+                  control={controlCreate}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => appendCreate("")}
-                >
-                  Add Tag
-                </Button>
-              </div>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Textarea {...registerCreate("content")} placeholder="Content" />
+                <Input {...registerCreate("author")} placeholder="Author" />
+                <Input {...registerCreate("image")} placeholder="Image URL" />
+                <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
+                <Input
+                  type="time"
+                  {...registerCreate("readTime")}
+                  placeholder="Read Time"
+                />
+                <Input
+                  type="date"
+                  {...registerCreate("date")}
+                  placeholder="Date"
+                />
+                <Input
+                  type="number"
+                  {...registerCreate("likes")}
+                  placeholder="Likes"
+                />
+                <Controller
+                  name="featured"
+                  control={controlCreate}
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="featured-create"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label htmlFor="featured-create">Featured</Label>
+                    </div>
+                  )}
+                />
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createMutation.isLoading}>
-                  {createMutation.isLoading ? "Creating..." : "Create"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div>
+                  <Label>Tags</Label>
+                  {fieldsCreate.map((field, index) => (
+                    <div key={field.id} className="flex items-center gap-2 mt-2">
+                      <Input
+                        {...registerCreate(`tags.${index}`)}
+                        placeholder="Tag"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeCreate(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => appendCreate("")}
+                  >
+                    Add Tag
+                  </Button>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isLoading}>
+                    {createMutation.isLoading ? "Creating..." : "Create"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>

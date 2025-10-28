@@ -14,7 +14,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Copy } from "lucide-react";
+import { Plus, Edit, Trash, Copy, Upload } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Notes = () => {
@@ -85,6 +85,38 @@ const Notes = () => {
     }
   };
 
+  const handleExport = () => {
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(notes, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "notes.json";
+    link.click();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            importedData.forEach((note) => {
+              createNote.mutate(note);
+            });
+          } else {
+            toast.error("Invalid JSON format. Expected an array of notes.");
+          }
+        } catch (error) {
+          toast.error("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   // ✅ Copy handler
   const handleCopy = async (text) => {
     try {
@@ -106,6 +138,22 @@ const Notes = () => {
           <h1 className="text-3xl font-bold">Notes</h1>
           <p className="mt-2">Create and manage your notes</p>
         </div>
+        <div className="flex space-x-2">
+          <Button onClick={handleExport}>
+            <Upload className="mr-2 h-4 w-4" /> Export JSON
+          </Button>
+          <Button asChild>
+            <label htmlFor="import-json">
+              <Upload className="mr-2 h-4 w-4" /> Import JSON
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImport}
+              />
+            </label>
+          </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingNote(null)}>
@@ -146,6 +194,7 @@ const Notes = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Notes Grid */}

@@ -13,13 +13,14 @@ import {
   DialogTrigger, 
   DialogFooter 
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Link as LinkIcon } from "lucide-react";
+import { Plus, Edit, Trash, Link as LinkIcon, Search, Upload } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const QuickLinks = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: quickLinks, isLoading } = useQuery({
     queryKey: ["quickLinks"],
@@ -84,6 +85,42 @@ const QuickLinks = () => {
     }
   };
 
+  const handleExport = () => {
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(quickLinks, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "quicklinks.json";
+    link.click();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            importedData.forEach((link) => {
+              createQuickLink.mutate(link);
+            });
+          } else {
+            toast.error("Invalid JSON format. Expected an array of quick links.");
+          }
+        } catch (error) {
+          toast.error("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const filteredQuickLinks = quickLinks?.filter((link) =>
+    link.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -95,6 +132,22 @@ const QuickLinks = () => {
           <h1 className="text-3xl font-bold ">Quick Links</h1>
           <p className="mt-2">Create and manage your quick links</p>
         </div>
+        <div className="flex space-x-2">
+          <Button onClick={handleExport}>
+            <Upload className="mr-2 h-4 w-4" /> Export JSON
+          </Button>
+          <Button asChild>
+            <label htmlFor="import-json">
+              <Upload className="mr-2 h-4 w-4" /> Import JSON
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImport}
+              />
+            </label>
+          </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingLink(null)}>
@@ -122,31 +175,47 @@ const QuickLinks = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {quickLinks.map((link) => (
-          <Card key={link.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{link.title}</CardTitle>
-              <div className="flex space-x-2">
-                <Button variant="ghost" size="sm" onClick={() => { setEditingLink(link); setOpen(true); }}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => deleteQuickLink.mutate(link.id)}>
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <a href={link.link} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-500 hover:underline">
-                <LinkIcon className="mr-2 h-4 w-4" />
-                {link.link}
-              </a>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by title..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-4">
+            {filteredQuickLinks?.map((link) => (
+              <li key={link.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+                <div className="flex items-center space-x-4">
+                  <LinkIcon className="h-5 w-5 text-gray-500" />
+                  <div className="flex flex-col">
+                  <a href={link.link} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-500 hover:underline">
+                    {link.title}
+                  </a>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{link.link}</p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingLink(link); setOpen(true); }}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => deleteQuickLink.mutate(link.id)}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 };

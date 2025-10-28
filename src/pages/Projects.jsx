@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -189,6 +189,38 @@ const Projects = () => {
     setIsEditModalOpen(true);
   };
 
+  const handleExport = () => {
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(projectsData, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "projects.json";
+    link.click();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            importedData.forEach((project) => {
+              createMutation.mutate(project);
+            });
+          } else {
+            toast.error("Invalid JSON format. Expected an array of projects.");
+          }
+        } catch (error) {
+          toast.error("Error parsing JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const filteredProjects = projectsData.filter(
     (project) =>
       project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -209,6 +241,22 @@ const Projects = () => {
             Manage your projects
           </p>
         </div>
+        <div className="flex space-x-2">
+          <Button onClick={handleExport}>
+            <Upload className="mr-2 h-4 w-4" /> Export JSON
+          </Button>
+          <Button asChild>
+            <label htmlFor="import-json">
+              <Upload className="mr-2 h-4 w-4" /> Import JSON
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImport}
+              />
+            </label>
+          </Button>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center space-x-2">
@@ -367,6 +415,7 @@ const Projects = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

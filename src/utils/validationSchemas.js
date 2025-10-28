@@ -131,3 +131,8 @@ export const trainingSchema = yup.object({
 export const chatSchema = yup.object({
   query: yup.string().required("Query is required"),
 });
+
+export const codeLogSchema = yup.object({
+  title: yup.string().required("Title is required"),
+  code: yup.string().required("Code is required"),
+});

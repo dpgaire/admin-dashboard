@@ -169,5 +169,11 @@ export const chatUserAPI = {
   getAll: () => api.get('/chat/users'),
 };
 
+// Chat History API
+export const chatHistoryAPI = {
+  getAll: () => api.get('/chat/histories'),
+  delete: (userId, chatId) => api.delete(`/chat/history/${userId}/${chatId}`),
+};
+
 export default api;
 

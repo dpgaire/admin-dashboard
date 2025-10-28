@@ -19,7 +19,8 @@ import {
   MessageCircle,
   Dumbbell,
   Phone,
-  Link as LinkIcon
+  Link as LinkIcon,
+  History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -49,6 +50,7 @@ const navigation = [
   { name: "Queries", href: "/queries", icon: MessageSquare },
   { name: "Chat", href: "/chat", icon: MessageCircle },
   { name: "Chat Users", href: "/chat-user", icon: Users },
+  { name: "Chat History", href: "/chat-history", icon: History },
   { name: "Training", href: "/training", icon: Dumbbell },
   { name: "Contact", href: "/contact", icon: Phone },
 ];

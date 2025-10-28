@@ -149,7 +149,9 @@ const Contacts = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All User Feedback ({filteredContacts.length})</CardTitle>
+              <CardTitle>
+                All User Feedback ({filteredContacts.length})
+              </CardTitle>
               <CardDescription>
                 View user feedback from portfollio
               </CardDescription>
@@ -158,9 +160,17 @@ const Contacts = () => {
               <Checkbox
                 id="select-all"
                 onCheckedChange={handleSelectAll}
-                checked={selectedContacts.length === filteredContacts.length && filteredContacts.length > 0}
+                checked={
+                  selectedContacts.length === selectedContacts.length &&
+                  filteredContacts.length > 0
+                }
               />
-              <label htmlFor="select-all">Select All</label>
+              <label htmlFor="select-all">
+                {selectedContacts.length > 0 &&
+                selectedContacts.length === selectedContacts.length
+                  ? "Deselect All"
+                  : "Select All"}
+              </label>
             </div>
           </div>
         </CardHeader>

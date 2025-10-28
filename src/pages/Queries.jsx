@@ -155,7 +155,12 @@ const Queries = () => {
                 onCheckedChange={handleSelectAll}
                 checked={selectedQueries.length === filteredQuery.length && filteredQuery.length > 0}
               />
-              <label htmlFor="select-all">Select All</label>
+              <label htmlFor="select-all">
+                {filteredQuery.length > 0 &&
+        selectedQueries.length === filteredQuery.length
+          ? "Deselect All"
+          : "Select All"}
+                </label>
             </div>
           </div>
         </CardHeader>

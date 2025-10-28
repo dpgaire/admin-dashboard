@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Users, 
-  FolderOpen, 
-  Layers, 
-  FileText, 
-  User, 
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  X,
+  Home,
+  Users,
+  FolderOpen,
+  Layers,
+  FileText,
+  User,
   LogOut,
   Moon,
   Sun,
@@ -21,73 +21,75 @@ import {
   Phone,
   Link as LinkIcon,
   History,
-  Code
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '../context/AuthContext';
+  Code,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "../context/AuthContext";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // Initialize darkMode from localStorage
   const [darkMode, setDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    return savedMode === 'true';
+    const savedMode = localStorage.getItem("darkMode");
+    return savedMode === "true";
   });
 
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Tasks", href: "/tasks", icon: Layers },
-  { name: "Notes", href: "/notes", icon: FileText },
-  { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
-  { name: "Code Log", href: "/code-log", icon: Code },
-  { name: "About", href: "/about", icon: Info },
-  { name: "Projects", href: "/projects", icon: FolderKanban },
-  { name: "Blogs", href: "/blogs", icon: BookOpen },
-  { name: "Skills", href: "/skills", icon: Layers },
-  { name: "Queries", href: "/queries", icon: MessageSquare },
-  { name: "Chat", href: "/chat", icon: MessageCircle },
-  { name: "Chat Users", href: "/chat-user", icon: Users },
-  { name: "Chat History", href: "/chat-history", icon: History },
-  { name: "Training", href: "/training", icon: Dumbbell },
-  { name: "Contact", href: "/contact", icon: Phone },
-];
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Tasks", href: "/tasks", icon: Layers },
+    { name: "Notes", href: "/notes", icon: FileText },
+    { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
+    { name: "Code Log", href: "/code-log", icon: Code },
+    { name: "About", href: "/about", icon: Info },
+    { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Blogs", href: "/blogs", icon: BookOpen },
+    { name: "Skills", href: "/skills", icon: Layers },
+    { name: "Queries", href: "/queries", icon: MessageSquare },
+    { name: "Chat", href: "/chat", icon: MessageCircle },
+    { name: "Chat Users", href: "/chat-user", icon: Users },
+    { name: "Chat History", href: "/chat-history", icon: History },
+    { name: "Training", href: "/training", icon: Dumbbell },
+    { name: "Contact", href: "/contact", icon: Phone },
+  ];
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   // Sync darkMode with localStorage and document class
   useEffect(() => {
-    localStorage.setItem('darkMode', darkMode);
+    localStorage.setItem("darkMode", darkMode);
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
 
   const toggleDarkMode = () => {
-    setDarkMode(prev => !prev);
+    setDarkMode((prev) => !prev);
   };
 
   const isCurrentPath = (path) => location.pathname === path;
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen ${darkMode ? "dark" : ""}`}>
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
         {/* Sidebar */}
-        <div className={`
+        <div
+          className={`
           fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:static lg:inset-0
-        `}>
+        `}
+        >
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               CMS
@@ -101,7 +103,7 @@ const navigation = [
           </div>
 
           <nav className="mt-6 px-3">
-            <div className="space-y-1">
+            <div className="max-h-[calc(100vh-100px)] overflow-y-auto space-y-1 pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const current = isCurrentPath(item.href);
@@ -111,20 +113,24 @@ const navigation = [
                     to={item.href}
                     onClick={() => setSidebarOpen(false)}
                     className={`
-                      group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
-                      ${current
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                        : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-                      }
-                    `}
+            group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
+            ${
+              current
+                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+            }
+          `}
                   >
-                    <Icon className={`
-                      mr-3 h-5 w-5 transition-colors duration-200
-                      ${current 
-                        ? 'text-blue-500 dark:text-blue-300' 
-                        : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300'
-                      }
-                    `} />
+                    <Icon
+                      className={`
+              mr-3 h-5 w-5 transition-colors duration-200
+              ${
+                current
+                  ? "text-blue-500 dark:text-blue-300"
+                  : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300"
+              }
+            `}
+                    />
                     {item.name}
                   </Link>
                 );
@@ -133,35 +139,33 @@ const navigation = [
           </nav>
 
           {/* User info at bottom of sidebar */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <Link to="/profile">
-            <div className="flex items-center space-x-3 cursor-pointer">
-               
-                   {user.image ? (
-                      <img 
-                        src={user.image} 
-                        alt={user.fullName}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <Avatar className="h-8 w-8 cursor-pointer">
+              <div className="flex items-center space-x-3 cursor-pointer">
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt={user.fullName}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <Avatar className="h-8 w-8 cursor-pointer">
                     <AvatarFallback className="bg-blue-500 text-white">
-                      {user?.fullName?.charAt(0)?.toUpperCase() || 'A'}
+                      {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
                     </AvatarFallback>
                   </Avatar>
-                    )}
-                  
-                 
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {user?.fullName || 'Admin User'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {user?.email || 'admin@example.com'}
-                </p>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {user?.fullName || "Admin User"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user?.email || "admin@example.com"}
+                  </p>
+                </div>
               </div>
-            </div>
-             </Link>
+            </Link>
           </div>
         </div>
 
@@ -178,7 +182,8 @@ const navigation = [
                   <Menu className="h-6 w-6" />
                 </button>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {navigation.find(item => isCurrentPath(item.href))?.name || 'Dashboard'}
+                  {navigation.find((item) => isCurrentPath(item.href))?.name ||
+                    "Dashboard"}
                 </h2>
               </div>
 
@@ -190,27 +195,29 @@ const navigation = [
                   onClick={toggleDarkMode}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                  {darkMode ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
                 </Button>
 
                 {/* User menu */}
                 <div className="flex items-center space-x-3">
-                 
                   <Link to="/profile">
-                   {user.image ? (
-                      <img 
-                        src={user.image} 
+                    {user.image ? (
+                      <img
+                        src={user.image}
                         alt={user.fullName}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (
                       <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarFallback className="bg-blue-500 text-white">
-                      {user?.fullName?.charAt(0)?.toUpperCase() || 'A'}
-                    </AvatarFallback>
-                  </Avatar>
+                        <AvatarFallback className="bg-blue-500 text-white">
+                          {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
+                        </AvatarFallback>
+                      </Avatar>
                     )}
-                  
                   </Link>
                   <Button
                     variant="ghost"
@@ -227,9 +234,7 @@ const navigation = [
 
           {/* Page content */}
           <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
+            <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
       </div>

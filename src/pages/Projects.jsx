@@ -22,7 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -69,7 +68,6 @@ const Projects = () => {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
     control: controlCreate,
-    formState: { errors: errorsCreate },
     reset: resetCreate,
   } = useForm({
     resolver: yupResolver(projectSchema),
@@ -100,7 +98,6 @@ const Projects = () => {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
     control: controlEdit,
-    formState: { errors: errorsEdit },
     reset: resetEdit,
   } = useForm({
     resolver: yupResolver(projectSchema),
@@ -214,7 +211,7 @@ const Projects = () => {
             toast.error("Invalid JSON format. Expected an array of projects.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.");
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -232,7 +229,7 @@ const Projects = () => {
   }
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Projects
@@ -241,7 +238,7 @@ const Projects = () => {
             Manage your projects
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={handleExport}>
             <Upload className="mr-2 h-4 w-4" /> Export JSON
           </Button>
@@ -257,164 +254,176 @@ const Projects = () => {
               />
             </label>
           </Button>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Add Project</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>
-                Add a new project to your portfolio.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={handleSubmitCreate(handleCreateProject)}
-              className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
-            >
-              <Input {...registerCreate("title")} placeholder="Title" />
-              <Textarea
-                {...registerCreate("description")}
-                placeholder="Description"
-              />
-              <Textarea
-                {...registerCreate("longDescription")}
-                placeholder="Long Description"
-              />
-              <Controller
-                name="category"
-                control={controlCreate}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>Add Project</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Project</DialogTitle>
+                <DialogDescription>
+                  Add a new project to your portfolio.
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                onSubmit={handleSubmitCreate(handleCreateProject)}
+                className="space-y-4 max-h-[80vh] overflow-y-auto p-4"
+              >
+                <Input {...registerCreate("title")} placeholder="Title" />
+                <Textarea
+                  {...registerCreate("description")}
+                  placeholder="Description"
+                />
+                <Textarea
+                  {...registerCreate("longDescription")}
+                  placeholder="Long Description"
+                />
+                <Controller
+                  name="category"
+                  control={controlCreate}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Input {...registerCreate("liveUrl")} placeholder="Live URL" />
+                <Input
+                  {...registerCreate("githubUrl")}
+                  placeholder="GitHub URL"
+                />
+                <Input {...registerCreate("image")} placeholder="Image URL" />
+                <Textarea
+                  {...registerCreate("problem")}
+                  placeholder="Problem"
+                />
+                <Textarea
+                  {...registerCreate("process")}
+                  placeholder="Process"
+                />
+                <Textarea
+                  {...registerCreate("solution")}
+                  placeholder="Solution"
+                />
+
+                <Controller
+                  name="featured"
+                  control={controlCreate}
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="featured"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label htmlFor="featured">Featured</Label>
+                    </div>
+                  )}
+                />
+
+                <Controller
+                  name="status"
+                  control={controlCreate}
+                  render={({ field }) => (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="status"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label htmlFor="status">Active</Label>
+                    </div>
+                  )}
+                />
+                <div>
+                  <Label>Screenshots</Label>
+                  {fieldsCreateScreenshots.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2 mt-2"
+                    >
+                      <Input
+                        {...registerCreate(`screenshots.${index}`)}
+                        placeholder="Screenshots"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeCreateScreenshots(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => appendCreateScreenshots("")}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Input {...registerCreate("liveUrl")} placeholder="Live URL" />
-              <Input
-                {...registerCreate("githubUrl")}
-                placeholder="GitHub URL"
-              />
-              <Input {...registerCreate("image")} placeholder="Image URL" />
-              <Textarea {...registerCreate("problem")} placeholder="Problem" />
-              <Textarea {...registerCreate("process")} placeholder="Process" />
-              <Textarea
-                {...registerCreate("solution")}
-                placeholder="Solution"
-              />
-
-              <Controller
-                name="featured"
-                control={controlCreate}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="featured">Featured</Label>
-                  </div>
-                )}
-              />
-
-              <Controller
-                name="status"
-                control={controlCreate}
-                render={({ field }) => (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="status"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="status">Active</Label>
-                  </div>
-                )}
-              />
-              <div>
-                <Label>Screenshots</Label>
-                {fieldsCreateScreenshots.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mt-2">
-                    <Input
-                      {...registerCreate(`screenshots.${index}`)}
-                      placeholder="Screenshots"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeCreateScreenshots(index)}
+                    Add Screeshots
+                  </Button>
+                </div>
+                <div>
+                  <Label>Technologies</Label>
+                  {fieldsCreate.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2 mt-2"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => appendCreateScreenshots("")}
-                >
-                  Add Screeshots
-                </Button>
-              </div>
-              <div>
-                <Label>Technologies</Label>
-                {fieldsCreate.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mt-2">
-                    <Input
-                      {...registerCreate(`technologies.${index}`)}
-                      placeholder="Technology"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeCreate(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => appendCreate("")}
-                >
-                  Add Technology
-                </Button>
-              </div>
+                      <Input
+                        {...registerCreate(`technologies.${index}`)}
+                        placeholder="Technology"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeCreate(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => appendCreate("")}
+                  >
+                    Add Technology
+                  </Button>
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createMutation.isLoading}>
-                  {createMutation.isLoading ? "Creating..." : "Create"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isLoading}>
+                    {createMutation.isLoading ? "Creating..." : "Create"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -631,7 +640,8 @@ const Projects = () => {
               </Button>
               <Button type="submit" disabled={updateMutation.isLoading}>
                 {updateMutation.isLoading ? "Updating..." : "Update"}
-              </Button>.
+              </Button>
+              .
             </div>
           </form>
         </DialogContent>
@@ -641,4 +651,3 @@ const Projects = () => {
 };
 
 export default Projects;
-

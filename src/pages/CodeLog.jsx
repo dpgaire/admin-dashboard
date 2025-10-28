@@ -40,8 +40,6 @@ const CodeLog = () => {
     },
   });
 
-  console.log("codeLogs", codeLogs);
-
   const {
     register,
     handleSubmit,
@@ -132,7 +130,7 @@ const CodeLog = () => {
             toast.error("Invalid JSON format. Expected an array of code logs.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.");
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -145,12 +143,12 @@ const CodeLog = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Code Log</h1>
           <p className="mt-2">Manage your frequently used code snippets</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={handleExport}>
             <Upload className="mr-2 h-4 w-4" /> Export JSON
           </Button>
@@ -259,12 +257,11 @@ const CodeLog = () => {
                 </Button>
               </div>
             </CardHeader>
- <CardContent className="max-h-60 overflow-y-auto">
-  <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded-md overflow-x-auto text-sm whitespace-pre-wrap">
-    {log.code}
-  </pre>
-
-</CardContent>
+            <CardContent className="max-h-60 overflow-y-auto">
+              <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded-md overflow-x-auto text-sm whitespace-pre-wrap">
+                {log.code}
+              </pre>
+            </CardContent>
           </Card>
         ))}
       </div>

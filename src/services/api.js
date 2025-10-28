@@ -175,5 +175,14 @@ export const chatHistoryAPI = {
   delete: (userId, chatId) => api.delete(`/chat/history/${userId}/${chatId}`),
 };
 
+// Code Log API
+export const codeLogAPI = {
+  getAll: () => api.get('/code-log'),
+  getById: (id) => api.get(`/code-log/${id}`),
+  create: (data) => api.post('/code-log', data),
+  update: (id, data) => api.put(`/code-log/${id}`, data),
+  delete: (id) => api.delete(`/code-log/${id}`),
+};
+
 export default api;
 

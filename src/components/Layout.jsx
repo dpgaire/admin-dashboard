@@ -20,7 +20,8 @@ import {
   Dumbbell,
   Phone,
   Link as LinkIcon,
-  History
+  History,
+  Code
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -43,6 +44,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Notes", href: "/notes", icon: FileText },
   { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
+  { name: "Code Log", href: "/code-log", icon: Code },
   { name: "About", href: "/about", icon: Info },
   { name: "Projects", href: "/projects", icon: FolderKanban },
   { name: "Blogs", href: "/blogs", icon: BookOpen },

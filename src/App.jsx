@@ -25,6 +25,7 @@ import Notes from "./pages/Notes";
 import QuickLinks from "./pages/QuickLinks";
 import ChatUser from "./pages/ChatUser";
 import ChatHistory from "./pages/ChatHistory";
+import CodeLog from "./pages/CodeLog";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -58,6 +59,7 @@ const AuthenticatedApp = () => {
                 <Route path="/quicklinks" element={<QuickLinks />} />
                 <Route path="/chat-user" element={<ChatUser />} />
                 <Route path="/chat-history" element={<ChatHistory />} />
+                <Route path="/code-log" element={<CodeLog />} />
 
 
                 <Route

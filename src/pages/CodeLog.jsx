@@ -40,7 +40,14 @@ const CodeLog = () => {
     },
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  console.log("codeLogs", codeLogs);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(codeLogSchema),
   });
 
@@ -144,30 +151,37 @@ const CodeLog = () => {
           <p className="mt-2">Manage your frequently used code snippets</p>
         </div>
         <div className="flex space-x-2">
-            <Button onClick={handleExport}>
-                <Upload className="mr-2 h-4 w-4" /> Export JSON
-            </Button>
-            <Button asChild>
-                <label htmlFor="import-json">
-                <Upload className="mr-2 h-4 w-4" /> Import JSON
-                <input
-                    type="file"
-                    id="import-json"
-                    className="hidden"
-                    accept=".json"
-                    onChange={handleImport}
-                />
-                </label>
-            </Button>
+          <Button onClick={handleExport}>
+            <Upload className="mr-2 h-4 w-4" /> Export JSON
+          </Button>
+          <Button asChild>
+            <label htmlFor="import-json">
+              <Upload className="mr-2 h-4 w-4" /> Import JSON
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImport}
+              />
+            </label>
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { setEditingLog(null); reset(); }}>
+              <Button
+                onClick={() => {
+                  setEditingLog(null);
+                  reset();
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" /> Add Code Log
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingLog ? "Edit Code Log" : "Add New Code Log"}</DialogTitle>
+                <DialogTitle>
+                  {editingLog ? "Edit Code Log" : "Add New Code Log"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
@@ -177,17 +191,26 @@ const CodeLog = () => {
                     {...register("title")}
                     defaultValue={editingLog?.title || ""}
                   />
-                  {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+                  {errors.title && (
+                    <p className="text-red-500">{errors.title.message}</p>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="code">Code</label>
+                  <label htmlFor="code" className="block mb-1 font-medium">
+                    Code
+                  </label>
                   <Textarea
                     id="code"
                     {...register("code")}
                     defaultValue={editingLog?.code || ""}
                     rows={10}
+                    className="w-full h-40 resize-none overflow-y-auto border rounded-md p-2"
                   />
-                  {errors.code && <p className="text-red-500">{errors.code.message}</p>}
+                  {errors.code && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.code.message}
+                    </p>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button
@@ -236,14 +259,12 @@ const CodeLog = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-                <ReactJson 
-                    src={JSON.parse(log.code)} 
-                    theme="solarized"
-                    displayDataTypes={false}
-                    enableClipboard={false}
-                />
-            </CardContent>
+ <CardContent className="max-h-60 overflow-y-auto">
+  <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded-md overflow-x-auto text-sm whitespace-pre-wrap">
+    {log.code}
+  </pre>
+
+</CardContent>
           </Card>
         ))}
       </div>

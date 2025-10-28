@@ -26,6 +26,7 @@ import QuickLinks from "./pages/QuickLinks";
 import ChatUser from "./pages/ChatUser";
 import ChatHistory from "./pages/ChatHistory";
 import CodeLog from "./pages/CodeLog";
+import Tasks from "./pages/Tasks";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
                 <Route path="/chat-user" element={<ChatUser />} />
                 <Route path="/chat-history" element={<ChatHistory />} />
                 <Route path="/code-log" element={<CodeLog />} />
+                <Route path="/tasks" element={<Tasks />} />
 
 
                 <Route

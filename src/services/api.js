@@ -187,5 +187,13 @@ export const codeLogAPI = {
   delete: (id) => api.delete(`/code-log/${id}`),
 };
 
+// Tasks API
+export const tasksAPI = {
+  getAll: () => api.get('/tasks'),
+  create: (data) => api.post('/tasks', data),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+  delete: (id) => api.delete(`/tasks/${id}`),
+};
+
 export default api;
 

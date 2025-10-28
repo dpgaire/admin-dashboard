@@ -69,7 +69,6 @@ const Blogs = () => {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
     control: controlCreate,
-    formState: { errors: errorsCreate },
     reset: resetCreate,
   } = useForm({
     resolver: yupResolver(blogSchema),
@@ -91,7 +90,6 @@ const Blogs = () => {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
     control: controlEdit,
-    formState: { errors: errorsEdit },
     reset: resetEdit,
   } = useForm({
     resolver: yupResolver(blogSchema),
@@ -193,7 +191,7 @@ const Blogs = () => {
             toast.error("Invalid JSON format. Expected an array of blogs.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.");
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -212,7 +210,7 @@ const Blogs = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Blogs
@@ -221,7 +219,7 @@ const Blogs = () => {
             Manage your blogs
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={handleExport}>
             <Upload className="mr-2 h-4 w-4" /> Export JSON
           </Button>
@@ -276,10 +274,16 @@ const Blogs = () => {
                     </Select>
                   )}
                 />
-                <Textarea {...registerCreate("content")} placeholder="Content" />
+                <Textarea
+                  {...registerCreate("content")}
+                  placeholder="Content"
+                />
                 <Input {...registerCreate("author")} placeholder="Author" />
                 <Input {...registerCreate("image")} placeholder="Image URL" />
-                <Textarea {...registerCreate("excerpt")} placeholder="Excerpt" />
+                <Textarea
+                  {...registerCreate("excerpt")}
+                  placeholder="Excerpt"
+                />
                 <Input
                   type="time"
                   {...registerCreate("readTime")}
@@ -313,7 +317,10 @@ const Blogs = () => {
                 <div>
                   <Label>Tags</Label>
                   {fieldsCreate.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-2 mt-2">
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2 mt-2"
+                    >
                       <Input
                         {...registerCreate(`tags.${index}`)}
                         placeholder="Tag"
@@ -398,7 +405,7 @@ const Blogs = () => {
                     </p>
 
                     <div className="flex justify-between items-center font-semibold gap-2 mt-4">
-                        <BlogDetailModal blog={blog} />
+                      <BlogDetailModal blog={blog} />
                       <div>
                         <Button
                           variant="ghost"
@@ -438,26 +445,26 @@ const Blogs = () => {
           >
             <Input {...registerEdit("title")} placeholder="Title" />
             <Controller
-                          name="category"
-                          control={controlEdit}
-                          render={({ field }) => (
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categoryOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        />
+              name="category"
+              control={controlEdit}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             <Textarea {...registerEdit("content")} placeholder="Content" />
             <Input {...registerEdit("author")} placeholder="Author" />
             <Input {...registerEdit("image")} placeholder="Image URL" />

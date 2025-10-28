@@ -110,7 +110,7 @@ const Notes = () => {
             toast.error("Invalid JSON format. Expected an array of notes.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.");
+          toast.error("Error parsing JSON file.",error);
         }
       };
       reader.readAsText(file);
@@ -133,12 +133,12 @@ const Notes = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Notes</h1>
           <p className="mt-2">Create and manage your notes</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={handleExport}>
             <Upload className="mr-2 h-4 w-4" /> Export JSON
           </Button>

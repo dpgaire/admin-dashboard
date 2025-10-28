@@ -185,7 +185,7 @@ const Skills = () => {
             toast.error("Invalid JSON format. Expected an array of skills.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.");
+          toast.error("Error parsing JSON file.",error);
         }
       };
       reader.readAsText(file);
@@ -202,7 +202,8 @@ const Skills = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+           <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
+
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Skills
@@ -211,7 +212,7 @@ const Skills = () => {
             Manage your skills
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={handleExport}>
             <Upload className="mr-2 h-4 w-4" /> Export JSON
           </Button>

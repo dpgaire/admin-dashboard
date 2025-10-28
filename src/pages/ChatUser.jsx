@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -17,12 +19,25 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { chatUserAPI } from "../services/api";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ChatUser = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   const { data: usersData = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["chatUsers"],
@@ -35,6 +50,43 @@ const ChatUser = () => {
       toast.error("Failed to load chat users");
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: chatUserAPI.delete,
+    onSuccess: () => {
+      toast.success("User deleted successfully!");
+      queryClient.invalidateQueries(["chatUsers"]);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || "Failed to delete user";
+      toast.error(message);
+    },
+  });
+
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all(
+        selectedUsers.map((id) => deleteMutation.mutateAsync(id))
+      );
+      setSelectedUsers([]);
+    } catch (error) {
+      console.error("Error deleting selected users:", error);
+    }
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedUsers(filteredUsers.map((u) => u.id));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleSelectUser = (id) => {
+    setSelectedUsers((prev) =>
+      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+    );
+  };
 
   const filteredUsers = usersData.filter(
     (user) =>
@@ -57,6 +109,31 @@ const ChatUser = () => {
             List of users available for chat
           </p>
         </div>
+        {selectedUsers.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Selected ({selectedUsers.length})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  selected users.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteSelected}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
 
       <Card>
@@ -87,6 +164,13 @@ const ChatUser = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>
+                    <Checkbox
+                      id="select-all"
+                      onCheckedChange={handleSelectAll}
+                      checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                    />
+                  </TableHead>
                   <TableHead>Full Name</TableHead>
                   <TableHead>Email</TableHead>
                 </TableRow>
@@ -94,6 +178,13 @@ const ChatUser = () => {
               <TableBody>
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
+                    <TableCell>
+                      <Checkbox
+                        id={user.id}
+                        onCheckedChange={() => handleSelectUser(user.id)}
+                        checked={selectedUsers.includes(user.id)}
+                      />
+                    </TableCell>
                     <TableCell>{user.fullName}</TableCell>
                     <TableCell>{user.email}</TableCell>
                   </TableRow>

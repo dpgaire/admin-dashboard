@@ -108,12 +108,14 @@ export const blogAPI = {
 }
 //Contact API
 export const contactAPI = {
-  getAll: () => api.get('/contact')
+  getAll: () => api.get('/contact'),
+  delete: (id) => api.delete(`/contact/${id}`),
 }
 
 //User query API
 export const userQueryAPI = {
-  getAll: () => api.get('/queries')
+  getAll: () => api.get('/queries'),
+  delete: (id) => api.delete(`/queries/${id}`),
 }
 
 //Skills API
@@ -167,6 +169,7 @@ export const statsAPI = {
 // Chat User API
 export const chatUserAPI = {
   getAll: () => api.get('/chat/users'),
+  delete: (id) => api.delete(`/chat/users/${id}`),
 };
 
 // Chat History API
@@ -182,6 +185,14 @@ export const codeLogAPI = {
   create: (data) => api.post('/code-log', data),
   update: (id, data) => api.put(`/code-log/${id}`, data),
   delete: (id) => api.delete(`/code-log/${id}`),
+};
+
+// Tasks API
+export const tasksAPI = {
+  getAll: () => api.get('/tasks'),
+  create: (data) => api.post('/tasks', data),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+  delete: (id) => api.delete(`/tasks/${id}`),
 };
 
 export default api;

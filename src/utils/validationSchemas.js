@@ -136,3 +136,11 @@ export const codeLogSchema = yup.object({
   title: yup.string().required("Title is required"),
   code: yup.string().required("Code is required"),
 });
+
+export const taskSchema = yup.object({
+  title: yup.string().required("Title is required"),
+  description: yup.string().optional(),
+  priority: yup.string().oneOf(["Low", "Medium", "High"]).optional(),
+  status: yup.string().oneOf(["todo", "in-progress", "completed"]).optional(),
+  dueDate: yup.date().optional(),
+});

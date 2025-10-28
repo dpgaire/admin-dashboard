@@ -213,7 +213,7 @@ const Dashboard = () => {
           <CardContent>
             <ul className="space-y-2">
               {contacts.slice(0, 5).map((contact) => (
-                <li key={contact._id} className="flex items-center">
+                <li key={contact.id} className="flex items-center">
                   <Phone className="mr-2 h-4 w-4" />
                   {contact.name} - {contact.email}
                 </li>

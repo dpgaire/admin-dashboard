@@ -81,7 +81,7 @@ const Profile = () => {
       }
 
       // Update user with FormData
-      const updatedUser = await usersAPI.update(user._id, formData);
+      const updatedUser = await usersAPI.update(user.id, formData);
 
       // Update local storage with new user data
       localStorage.setItem("user", JSON.stringify(updatedUser));

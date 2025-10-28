@@ -42,6 +42,7 @@ const Layout = ({ children }) => {
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Tasks", href: "/tasks", icon: Layers },
   { name: "Notes", href: "/notes", icon: FileText },
   { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
   { name: "Code Log", href: "/code-log", icon: Code },

@@ -14,6 +14,17 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
 import { Plus, Edit, Trash, Copy, Upload } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -21,6 +32,7 @@ const Notes = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+  const [deleteNoteId, setDeleteNoteId] = useState(null);
 
   const { data: notes, isLoading } = useQuery({
     queryKey: ["notes"],
@@ -73,6 +85,13 @@ const Notes = () => {
     },
   });
 
+  const confirmDeleteNote = () => {
+    if (!deleteNoteId) return;
+    deleteNote.mutate(deleteNoteId, {
+      onSettled: () => setDeleteNoteId(null),
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -110,7 +129,7 @@ const Notes = () => {
             toast.error("Invalid JSON format. Expected an array of notes.");
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.",error);
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -123,7 +142,7 @@ const Notes = () => {
       await navigator.clipboard.writeText(text);
       toast.success("Copied to clipboard!");
     } catch (err) {
-      toast.error("Failed to copy text",err);
+      toast.error("Failed to copy text", err);
     }
   };
 
@@ -154,46 +173,78 @@ const Notes = () => {
               />
             </label>
           </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingNote(null)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Note
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingNote ? "Edit Note" : "Add New Note"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="title">Title</label>
-                <Input
-                  id="title"
-                  name="title"
-                  defaultValue={editingNote?.title || ""}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="description">Description</label>
-                <Textarea
-                  id="description"
-                  name="content"
-                  defaultValue={editingNote?.content || ""}
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  disabled={createNote.isLoading || updateNote.isLoading}
+          <AlertDialog
+            open={!!deleteNoteId}
+            onOpenChange={() => setDeleteNoteId(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {" "}
+                  Delete note "{notes.find((n) => n.id === deleteNoteId)?.title}
+                  "?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The note will be permanently
+                  deleted.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteNoteId(null)}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmDeleteNote}
+                  className="bg-red-600 hover:bg-red-700 text-white"
                 >
-                  {editingNote ? "Update" : "Create"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditingNote(null)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Note
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingNote ? "Edit Note" : "Add New Note"}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="title">Title</label>
+                  <Input
+                    id="title"
+                    name="title"
+                    defaultValue={editingNote?.title || ""}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="description">Description</label>
+                  <Textarea
+                    id="description"
+                    name="content"
+                    defaultValue={editingNote?.content || ""}
+                    required
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="submit"
+                    disabled={createNote.isLoading || updateNote.isLoading}
+                  >
+                    {editingNote ? "Update" : "Create"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -217,17 +268,17 @@ const Notes = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => deleteNote.mutate(note.id)}
+                  onClick={() => setDeleteNoteId(note.id)}
                 >
                   <Trash className="h-4 w-4" />
                 </Button>
-                 <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleCopy(note.content)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCopy(note.content)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="relative">

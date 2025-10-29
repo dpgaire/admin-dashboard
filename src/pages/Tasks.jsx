@@ -21,6 +21,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +43,8 @@ const Tasks = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { register, handleSubmit, control, reset, setValue } = useForm({
     resolver: yupResolver(taskSchema),
@@ -110,7 +122,9 @@ const Tasks = () => {
 
   const handleCreateTask = (data) => {
     createTaskMutation.mutate(data);
-    setEditingTask(null)
+    console.log("loading state", createTaskMutation.isLoading);
+
+    setEditingTask(null);
   };
 
   const handleEditTask = (data) => {
@@ -119,13 +133,27 @@ const Tasks = () => {
   };
 
   const handleDeleteTask = (id) => {
-    deleteTaskMutation.mutate(id);
+    setDeleteTaskId(id); // open confirmation modal
+  };
+
+  const confirmDeleteTask = () => {
+    if (!deleteTaskId) return;
+    deleteTaskMutation.mutate(deleteTaskId, {
+      onSuccess: () => {
+        setDeleteTaskId(null);
+      },
+      onSettled: () => {
+        setDeleteTaskId(null);
+      },
+    });
   };
 
   const openEditModal = (task) => {
     setEditingTask(task);
     setIsEditModalOpen(true);
   };
+
+  console.log("loading state", createTaskMutation.isLoading);
 
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -147,10 +175,16 @@ const Tasks = () => {
     updateTaskMutation.mutate({ id: task.id, data: updatedTask });
   };
 
+  const filteredTasks = tasksData.filter((task) =>
+    task.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const columns = {
-    todo: tasksData.filter((task) => task.status === "todo"),
-    "in-progress": tasksData.filter((task) => task.status === "in-progress"),
-    completed: tasksData.filter((task) => task.status === "completed"),
+    todo: filteredTasks.filter((task) => task.status === "todo"),
+    "in-progress": filteredTasks.filter(
+      (task) => task.status === "in-progress"
+    ),
+    completed: filteredTasks.filter((task) => task.status === "completed"),
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -168,62 +202,116 @@ const Tasks = () => {
           </p>
         </div>
 
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a new task</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(handleCreateTask)} className="space-y-4">
-              <Input {...register("title")} placeholder="Task title" />
-              <Textarea {...register("description")} placeholder="Description" />
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todo">To-Do</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Controller
-                name="priority"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Low">Low</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="High">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Input {...register("dueDate")} type="date" />
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Create</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Add Task
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a new task</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={handleSubmit(handleCreateTask)}
+                className="space-y-4"
+              >
+                <Input {...register("title")} placeholder="Task title" />
+                <Textarea
+                  {...register("description")}
+                  placeholder="Description"
+                />
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todo">To-Do</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Controller
+                  name="priority"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Input {...register("dueDate")} type="date" />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createTaskMutation.isLoading}>
+                    {createTaskMutation.isLoading ? "Creating..." : "Create"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
+      <div className="w-full">
+        <Input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
+      </div>
+      <AlertDialog
+        open={!!deleteTaskId}
+        onOpenChange={() => setDeleteTaskId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              task and remove its data from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTaskId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteTask}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -231,7 +319,9 @@ const Tasks = () => {
           {Object.entries(columns).map(([columnId, tasks]) => (
             <Card key={columnId}>
               <CardHeader>
-                <CardTitle className="capitalize">{columnId.replace("-", " ")}</CardTitle>
+                <CardTitle className="capitalize">
+                  {columnId.replace("-", " ")}
+                </CardTitle>
               </CardHeader>
 
               <CardContent>
@@ -243,7 +333,7 @@ const Tasks = () => {
                       className={
                         "min-h-[200px] p-2 rounded-md transition-colors " +
                         (snapshot.isDraggingOver
-                          ? "border-2 border-dashed border-slate-300 bg-slate-50"
+                          ? "border-2 border-dashed border-slate-300 bg-blue-900/50"
                           : "border border-transparent")
                       }
                     >
@@ -254,7 +344,11 @@ const Tasks = () => {
                       )}
 
                       {tasks.map((task, index) => (
-                        <Draggable key={task.id} draggableId={String(task.id)} index={index}>
+                        <Draggable
+                          key={task.id}
+                          draggableId={String(task.id)}
+                          index={index}
+                        >
                           {(providedDraggable, snapshotDraggable) => (
                             <div
                               ref={providedDraggable.innerRef}
@@ -262,11 +356,16 @@ const Tasks = () => {
                               {...providedDraggable.dragHandleProps}
                               className={
                                 "mb-3" +
-                                (snapshotDraggable.isDragging ? "opacity-95 shadow-lg" : "")
+                                (snapshotDraggable.isDragging
+                                  ? "opacity-95 shadow-lg"
+                                  : "")
                               }
                             >
-
-                              <TaskCard task={task} onEdit={openEditModal} onDelete={handleDeleteTask} />
+                              <TaskCard
+                                task={task}
+                                onEdit={openEditModal}
+                                onDelete={handleDeleteTask}
+                              />
                             </div>
                           )}
                         </Draggable>
@@ -292,26 +391,32 @@ const Tasks = () => {
             <Input {...register("title")} placeholder="Task title" />
             <Textarea {...register("description")} placeholder="Description" />
             <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todo">To-Do</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To-Do</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
             <Controller
               name="priority"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Priority" />
                   </SelectTrigger>
@@ -325,7 +430,11 @@ const Tasks = () => {
             />
             <Input {...register("dueDate")} type="date" />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">Update</Button>

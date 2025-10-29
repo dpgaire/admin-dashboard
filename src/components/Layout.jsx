@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
+import SidebarNav from "./SidebarNav";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -91,8 +92,14 @@ const Layout = ({ children }) => {
         `}
         >
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              CMS
+            <h1 className="text-xl font-bold text-gray-900 cursor-pointer dark:text-white">
+              <Link
+                to="https://www.durgagairhe.com.np/"
+                target="_blank"
+                className="hover:underline"
+              >
+                durGairhe
+              </Link>
             </h1>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -102,41 +109,10 @@ const Layout = ({ children }) => {
             </button>
           </div>
 
-          <nav className="mt-6 px-3">
-            <div className="max-h-[calc(100vh-100px)] overflow-y-auto space-y-1 pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const current = isCurrentPath(item.href);
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`
-            group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200
-            ${
-              current
-                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
-                : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
-            }
-          `}
-                  >
-                    <Icon
-                      className={`
-              mr-3 h-5 w-5 transition-colors duration-200
-              ${
-                current
-                  ? "text-blue-500 dark:text-blue-300"
-                  : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300"
-              }
-            `}
-                    />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
+          <SidebarNav
+            setSidebarOpen={setSidebarOpen}
+            isCurrentPath={isCurrentPath}
+          />
 
           {/* User info at bottom of sidebar */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">

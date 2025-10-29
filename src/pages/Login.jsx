@@ -48,7 +48,7 @@ const Login = () => {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold ">
-            Admin Dashboard 
+            Dashboard 
           </CardTitle>
           <CardDescription >
             Login

@@ -5,15 +5,22 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash, Link as LinkIcon, Search, Upload } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash,
+  Link as LinkIcon,
+  Search,
+  Upload,
+} from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const QuickLinks = () => {
@@ -107,10 +114,12 @@ const QuickLinks = () => {
               createQuickLink.mutate(link);
             });
           } else {
-            toast.error("Invalid JSON format. Expected an array of quick links.");
+            toast.error(
+              "Invalid JSON format. Expected an array of quick links."
+            );
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.",error);
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -127,8 +136,7 @@ const QuickLinks = () => {
 
   return (
     <div className="space-y-6">
-            <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
-
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold ">Quick Links</h1>
           <p className="mt-2">Create and manage your quick links</p>
@@ -149,33 +157,50 @@ const QuickLinks = () => {
               />
             </label>
           </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingLink(null)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Link
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingLink ? "Edit Link" : "Add New Link"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="title">Title</label>
-                <Input id="title" name="title" defaultValue={editingLink?.title || ""} required />
-              </div>
-              <div>
-                <label htmlFor="link">Link</label>
-                <Input id="link" name="link" defaultValue={editingLink?.link || ""} required />
-              </div>
-              <DialogFooter>
-                <Button type="submit" disabled={createQuickLink.isLoading || updateQuickLink.isLoading}>
-                  {editingLink ? "Update" : "Create"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setEditingLink(null)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Link
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingLink ? "Edit Link" : "Add New Link"}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="title">Title</label>
+                  <Input
+                    id="title"
+                    name="title"
+                    defaultValue={editingLink?.title || ""}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="link">Link</label>
+                  <Input
+                    id="link"
+                    name="link"
+                    defaultValue={editingLink?.link || ""}
+                    required
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="submit"
+                    disabled={
+                      createQuickLink.isLoading || updateQuickLink.isLoading
+                    }
+                  >
+                    {editingLink ? "Update" : "Create"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -194,21 +219,44 @@ const QuickLinks = () => {
         <CardContent>
           <ul className="space-y-4">
             {filteredQuickLinks?.map((link) => (
-              <li key={link.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
-                <div className="flex items-center space-x-4">
+              <li
+                key={link.id}
+                className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <div className="flex items-center space-x-4 min-w-0">
                   <LinkIcon className="h-5 w-5 text-gray-500" />
-                  <div className="flex flex-col">
-                  <a href={link.link} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-500 hover:underline">
-                    {link.title}
-                  </a>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{link.link}</p>
+                  <div className="flex flex-col min-w-0">
+                    <a
+                      href={link.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-500 hover:underline"
+                    >
+                      {link.title}
+                    </a>
+                  <p className="text-sm break-words text-gray-500 dark:text-gray-400">
+
+
+                      {link.link}
+                    </p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => { setEditingLink(link); setOpen(true); }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingLink(link);
+                      setOpen(true);
+                    }}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => deleteQuickLink.mutate(link.id)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteQuickLink.mutate(link.id)}
+                  >
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>

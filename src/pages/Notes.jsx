@@ -27,9 +27,12 @@ import {
 
 import { Plus, Edit, Trash, Copy, Upload } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { Search } from "lucide-react";
 
 const Notes = () => {
   const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [open, setOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [deleteNoteId, setDeleteNoteId] = useState(null);
@@ -60,6 +63,8 @@ const Notes = () => {
       toast.error("Failed to create note");
     },
   });
+
+  console.log('notes',notes)
 
   const updateNote = useMutation({
     mutationFn: (data) => notesAPI.update(editingNote.id, data),
@@ -145,6 +150,12 @@ const Notes = () => {
       toast.error("Failed to copy text", err);
     }
   };
+
+  const filteredNotes = notes?.filter(  
+    (note) =>
+      note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -232,6 +243,7 @@ const Notes = () => {
                     name="content"
                     defaultValue={editingNote?.content || ""}
                     required
+                    className="w-full h-40 resize-none overflow-y-auto border rounded-md p-2"
                   />
                 </div>
                 <DialogFooter>
@@ -247,46 +259,94 @@ const Notes = () => {
           </Dialog>
         </div>
       </div>
-
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search projects..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
       {/* Notes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {notes.map((note) => (
-          <Card key={note.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{note.title}</CardTitle>
-              <div className="flex space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditingNote(note);
-                    setOpen(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDeleteNoteId(note.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleCopy(note.content)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <p className="pr-8">{note.content}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {filteredNotes.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No projects found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+          {filteredNotes.map((note) => (
+            <Card
+              key={note.id}
+              className="
+        relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700
+        bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800
+        shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1
+        before:absolute before:inset-0
+        before:bg-[repeating-linear-gradient(white,white_24px,#e5e7eb_25px)]
+        dark:before:bg-[repeating-linear-gradient(#1f2937,#1f2937_24px,#374151_25px)]
+        before:opacity-60 before:-z-0
+      "
+            >
+              {/* Red margin line (dark mode adjusted) */}
+              <div className="absolute top-0 left-0 h-full w-[6px] bg-gradient-to-b from-green-300 via-blue-300 to-green-300 dark:from-green-600 dark:via-blue-700 dark:to-green-600 z-10" />
+
+              {/* Card Header (title + buttons) */}
+              <CardHeader className="relative flex flex-row items-center justify-between bg-transparent z-20 px-5 pt-2">
+                <CardTitle className="font-handwriting text-lg font-semibold text-gray-800 dark:text-gray-100 tracking-wide">
+                  {note.title}
+                </CardTitle>
+
+                <div className="flex space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingNote(note);
+                      setOpen(true);
+                    }}
+                    className="hover:bg-rose-100 dark:hover:bg-green-900/40 text-green-500 dark:text-green-400"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleteNoteId(note.id)}
+                    className="hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 dark:text-red-400"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(note.content)}
+                    className="hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-500 dark:text-blue-400"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+
+              {/* Content */}
+              <CardContent className="relative px-6 pb-6 pt-2 z-20">
+                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-medium">
+                  {note.content}
+                </p>
+              </CardContent>
+
+              {/* Bottom paper shadow */}
+              <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-t from-gray-200 dark:from-gray-700 to-transparent opacity-70"></div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

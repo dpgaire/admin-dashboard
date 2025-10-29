@@ -37,6 +37,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tasksAPI } from "../services/api";
 import { taskSchema } from "../utils/validationSchemas";
 import TaskCard from "@/components/TaskCard";
+import { Search } from "lucide-react";
 
 const Tasks = () => {
   const queryClient = useQueryClient();
@@ -175,17 +176,16 @@ const Tasks = () => {
     updateTaskMutation.mutate({ id: task.id, data: updatedTask });
   };
 
-  const filteredTasks = tasksData.filter((task) =>
-    task.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const columns = tasksData.reduce(
+    (acc, task) => {
+      if (task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+        if (!acc[task.status]) acc[task.status] = [];
+        acc[task.status].push(task);
+      }
+      return acc;
+    },
+    { todo: [], "in-progress": [], completed: [] }
   );
-
-  const columns = {
-    todo: filteredTasks.filter((task) => task.status === "todo"),
-    "in-progress": filteredTasks.filter(
-      (task) => task.status === "in-progress"
-    ),
-    completed: filteredTasks.filter((task) => task.status === "completed"),
-  };
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -278,15 +278,19 @@ const Tasks = () => {
           </Dialog>
         </div>
       </div>
-      <div className="w-full">
-        <Input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
-        />
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search users..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
       <AlertDialog
         open={!!deleteTaskId}
         onOpenChange={() => setDeleteTaskId(null)}

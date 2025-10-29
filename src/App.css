@@ -110,6 +110,78 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.font-handwriting {
+  font-family: 'Kalam', cursive;
+}
+
+/* ========================
+   Custom Scrollbar Styles
+   ======================== */
+
+/* Light Mode */
+body {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #cbd5e1 #f1f5f9; /* thumb | track */
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #f1f5f9; /* Light track */
+  border-radius: 4px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #94a3b8; /* Light thumb */
+  border-radius: 4px;
+  border: 2px solid #f1f5f9; /* padding effect */
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b; /* Hover thumb */
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    scrollbar-color: #475569 transparent;
+  }
+
+  body::-webkit-scrollbar-track {
+    background: transparent; /* Dark track */
+  }
+
+  body::-webkit-scrollbar-thumb {
+    background-color: #475569; /* Dark thumb */
+    border: 2px solid #1e1e1e;
+  }
+
+  body::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b;
+  }
+}
+
+/* Optional: Scrollbar for specific code blocks */
+pre::-webkit-scrollbar,
+.card-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+pre::-webkit-scrollbar-track,
+.card-content::-webkit-scrollbar-track {
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb,
+.card-content::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -26,7 +26,8 @@ import { trainingAPI } from "../services/api";
 import { trainingSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import ReactJson from 'react-json-view';
+import ReactJson from "react-json-view";
+import { Copy } from "lucide-react";
 
 const Training = () => {
   const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ const Training = () => {
     },
   });
 
-  console.log('trainingData',trainingData)
+  console.log("trainingData", trainingData);
 
   const {
     register: registerCreate,
@@ -58,11 +59,15 @@ const Training = () => {
   } = useForm({
     resolver: yupResolver(trainingSchema),
     defaultValues: {
-      tags: [""]
-    }
+      tags: [""],
+    },
   });
 
-  const { fields: fieldsCreate, append: appendCreate, remove: removeCreate } = useFieldArray({
+  const {
+    fields: fieldsCreate,
+    append: appendCreate,
+    remove: removeCreate,
+  } = useFieldArray({
     control: controlCreate,
     name: "tags",
   });
@@ -77,7 +82,11 @@ const Training = () => {
     resolver: yupResolver(trainingSchema),
   });
 
-  const { fields: fieldsEdit, append: appendEdit, remove: removeEdit } = useFieldArray({
+  const {
+    fields: fieldsEdit,
+    append: appendEdit,
+    remove: removeEdit,
+  } = useFieldArray({
     control: controlEdit,
     name: "tags",
   });
@@ -168,10 +177,12 @@ const Training = () => {
               createMutation.mutate(item);
             });
           } else {
-            toast.error("Invalid JSON format. Expected an array of training data.");
+            toast.error(
+              "Invalid JSON format. Expected an array of training data."
+            );
           }
         } catch (error) {
-          toast.error("Error parsing JSON file.",error);
+          toast.error("Error parsing JSON file.", error);
         }
       };
       reader.readAsText(file);
@@ -185,14 +196,22 @@ const Training = () => {
       item.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy text", err);
+    }
+  };
+
   if (isLoadingTraining) {
     return <LoadingSpinner />;
   }
 
   return (
     <div className="space-y-6">
-           <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
-
+      <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Training
@@ -217,59 +236,74 @@ const Training = () => {
               />
             </label>
           </Button>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Add Data</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Create New Training Data</DialogTitle>
-            </DialogHeader>
-            <form
-             onSubmit={handleSubmitCreate(handleCreate)}
-              className="space-y-4">
-              <Input {...registerCreate("category")} placeholder="Category" />
-              {errorsCreate.category && <p className="text-red-500">{errorsCreate.category.message}</p>}
-              <Input {...registerCreate("title")} placeholder="Title" />
-              {errorsCreate.title && <p className="text-red-500">{errorsCreate.title.message}</p>}
-              <Textarea {...registerCreate("content")} placeholder="Content" />
-              {errorsCreate.content && <p className="text-red-500">{errorsCreate.content.message}</p>}
-              <div>
-                <Label>Tags</Label>
-                {fieldsCreate.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mt-2">
-                    <Input
-                      {...registerCreate(`tags.${index}`)}
-                      placeholder="Tag"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeCreate(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => appendCreate("")}
-                >
-                  Add Tag
-                </Button>
-              </div>
-              
-              <Button type="submit" disabled={createMutation.isLoading}>
-                {createMutation.isLoading ? "Creating..." : "Create"}
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>Add Data</span>
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Create New Training Data</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={handleSubmitCreate(handleCreate)}
+                className="space-y-4"
+              >
+                <Input {...registerCreate("category")} placeholder="Category" />
+                {errorsCreate.category && (
+                  <p className="text-red-500">
+                    {errorsCreate.category.message}
+                  </p>
+                )}
+                <Input {...registerCreate("title")} placeholder="Title" />
+                {errorsCreate.title && (
+                  <p className="text-red-500">{errorsCreate.title.message}</p>
+                )}
+                <Textarea
+                  {...registerCreate("content")}
+                  placeholder="Content"
+                />
+                {errorsCreate.content && (
+                  <p className="text-red-500">{errorsCreate.content.message}</p>
+                )}
+                <div>
+                  <Label>Tags</Label>
+                  {fieldsCreate.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2 mt-2"
+                    >
+                      <Input
+                        {...registerCreate(`tags.${index}`)}
+                        placeholder="Tag"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => removeCreate(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => appendCreate("")}
+                  >
+                    Add Tag
+                  </Button>
+                </div>
+
+                <Button type="submit" disabled={createMutation.isLoading}>
+                  {createMutation.isLoading ? "Creating..." : "Create"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -297,24 +331,43 @@ const Training = () => {
                   <CardDescription>{item.category}</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => openEditModal(item)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openEditModal(item)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} disabled={deleteMutation.isLoading}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(item.id)}
+                    disabled={deleteMutation.isLoading}
+                  >
                     <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(item.title)}
+                  >
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <ReactJson 
-                src={item} 
+              <ReactJson
+                src={item}
                 theme="solarized"
                 onEdit={(edit) => {
-                  updateMutation.mutate({ id: item.id, data: edit.updated_src });
+                  updateMutation.mutate({
+                    id: item.id,
+                    data: edit.updated_src,
+                  });
                 }}
                 onDelete={() => {
-                  handleDelete(item.id)
+                  handleDelete(item.id);
                 }}
               />
             </CardContent>
@@ -329,19 +382,22 @@ const Training = () => {
           </DialogHeader>
           <form onSubmit={handleSubmitEdit(handleEdit)} className="space-y-4">
             <Input {...registerEdit("category")} placeholder="Category" />
-            {errorsEdit.category && <p className="text-red-500">{errorsEdit.category.message}</p>}
+            {errorsEdit.category && (
+              <p className="text-red-500">{errorsEdit.category.message}</p>
+            )}
             <Input {...registerEdit("title")} placeholder="Title" />
-            {errorsEdit.title && <p className="text-red-500">{errorsEdit.title.message}</p>}
+            {errorsEdit.title && (
+              <p className="text-red-500">{errorsEdit.title.message}</p>
+            )}
             <Textarea {...registerEdit("content")} placeholder="Content" />
-            {errorsEdit.content && <p className="text-red-500">{errorsEdit.content.message}</p>}
+            {errorsEdit.content && (
+              <p className="text-red-500">{errorsEdit.content.message}</p>
+            )}
             <div>
               <Label>Tags</Label>
               {fieldsEdit.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2 mt-2">
-                  <Input
-                    {...registerEdit(`tags.${index}`)}
-                    placeholder="Tag"
-                  />
+                  <Input {...registerEdit(`tags.${index}`)} placeholder="Tag" />
                   <Button
                     type="button"
                     variant="ghost"

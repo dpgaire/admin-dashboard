@@ -19,12 +19,13 @@ import {
 import { Plus, Edit, Trash, Copy, Upload } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { codeLogSchema } from "@/utils/validationSchemas";
-import ReactJson from "react-json-view";
+import { Search } from "lucide-react";
 
 const CodeLog = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingLog, setEditingLog] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: codeLogs, isLoading } = useQuery({
     queryKey: ["codeLogs"],
@@ -137,6 +138,10 @@ const CodeLog = () => {
     }
   };
 
+  const filteredCodeLogs = codeLogs?.filter((code) =>
+    code.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -223,48 +228,87 @@ const CodeLog = () => {
           </Dialog>
         </div>
       </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search users..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      {filteredCodeLogs.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No data found.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCodeLogs.map((log) => (
+            <Card
+              key={log.id}
+              className="bg-gray-50 text-gray-900 dark:bg-[#1e1e1e] dark:text-gray-200 gap-0 shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+              {/* Header */}
+              <CardHeader className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700  ">
+                <CardTitle className="text-sm font-semibold truncate">
+                  {log.title}
+                </CardTitle>
+                <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    onClick={() => {
+                      setEditingLog(log);
+                      reset(log);
+                      setOpen(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    onClick={() => deleteLog.mutate(log.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    onClick={() => handleCopy(log.code)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {codeLogs.map((log) => (
-          <Card key={log.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{log.title}</CardTitle>
-              <div className="flex space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditingLog(log);
-                    reset(log);
-                    setOpen(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteLog.mutate(log.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleCopy(log.code)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="max-h-60 overflow-y-auto">
-              <pre className="bg-gray-100 dark:bg-gray-900 p-2 rounded-md overflow-x-auto text-sm whitespace-pre-wrap">
-                {log.code}
-              </pre>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              {/* Code Editor Area */}
+              <CardContent className="max-h-60 overflow-y-auto bg-gray-50 dark:bg-[#1e1e1e] text-sm font-mono leading-6 p-0">
+                <div className="flex">
+                  {/* Line Numbers */}
+                  <div className="bg-gray-100 dark:bg-[#252526] text-gray-400 dark:text-gray-500 text-right pr-3 pl-2 select-none border-r border-gray-200 dark:border-gray-700">
+                    {log.code.split("\n").map((_, i) => (
+                      <div key={i}>{i + 1}</div>
+                    ))}
+                  </div>
+
+                  {/* Code Content */}
+                  <pre className="flex-1 text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words p-3 overflow-x-auto">
+                    {log.code}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

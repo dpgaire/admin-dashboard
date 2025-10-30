@@ -8,10 +8,28 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { FileText, Home, Layers, Link as LinkIcon, FolderKanban, BookOpen, Dumbbell, MessageSquare, Phone, MessageCircle, Users, History, Code, Info, User, Settings } from "lucide-react";
-import { Timer } from "lucide-react";
-import { Target } from "lucide-react";
-import { DollarSign } from "lucide-react";
+import {
+  FileText,
+  Home,
+  Layers,
+  Link as LinkIcon,
+  FolderKanban,
+  BookOpen,
+  Dumbbell,
+  MessageSquare,
+  Phone,
+  MessageCircle,
+  Users,
+  History,
+  Code,
+  Info,
+  User,
+  Settings,
+  Timer,
+  Target,
+  DollarSign,
+  Library as LibraryIcon,
+} from "lucide-react";
 
 const CommandPalette = () => {
   const [open, setOpen] = useState(false);
@@ -44,6 +62,7 @@ const CommandPalette = () => {
     { name: "Pomodoro Timer", href: "/pomodoro-timer", icon: Timer },
     { name: "Goal Setting", href: "/goal-setting", icon: Target },
     { name: "Blogs", href: "/blogs", icon: BookOpen },
+    { name: "Library", href: "/library", icon: LibraryIcon },
     { name: "Skills", href: "/skills", icon: Layers },
     { name: "Training", href: "/training", icon: Dumbbell },
     { name: "Queries", href: "/queries", icon: MessageSquare },
@@ -57,7 +76,6 @@ const CommandPalette = () => {
     { name: "JSON Formatter", href: "/json-formatter", icon: Code },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
-    
   ];
 
   return (

@@ -214,5 +214,13 @@ export const expenseAPI = {
   delete: (id) => api.delete(`/expenses/${id}`),
 };
 
+// Library API
+export const libraryAPI = {
+  getAll: () => api.get('/library'),
+  create: (data) => api.post('/library', data),
+  update: (id, data) => api.put(`/library/${id}`, data),
+  delete: (id) => api.delete(`/library/${id}`),
+};
+
 export default api;
 

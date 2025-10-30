@@ -36,6 +36,8 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
         { name: "About", href: "/about", icon: Info },
         { name: "Projects", href: "/projects", icon: FolderKanban },
         { name: "Blogs", href: "/blogs", icon: BookOpen },
+        { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
+        { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
         { name: "Skills", href: "/skills", icon: Layers },
         { name: "Training", href: "/training", icon: Dumbbell },
       ],

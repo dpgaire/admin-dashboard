@@ -96,7 +96,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
 
   return (
     <nav className="mt-6 px-3">
-      <div className="max-h-[calc(100vh-100px)] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+      <div className="max-h-[calc(100vh-100px)] pb-12 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
         {menuGroups.map((group) => (
           <div key={group.title} className="mb-3">
             <button

@@ -28,6 +28,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
 import SidebarNav from "./SidebarNav";
 import CommandPalette from "./CommandPalette";
+import { DollarSign } from "lucide-react";
+import { Timer } from "lucide-react";
+import { Target } from "lucide-react";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,17 +50,24 @@ const Layout = ({ children }) => {
     { name: "Tasks", href: "/tasks", icon: Layers },
     { name: "Notes", href: "/notes", icon: FileText },
     { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
-    { name: "Code Log", href: "/code-log", icon: Code },
     { name: "About", href: "/about", icon: Info },
     { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Pomodoro Timer", href: "/pomodoro-timer", icon: Timer },
+    { name: "Goal Setting", href: "/goal-setting", icon: Target },
     { name: "Blogs", href: "/blogs", icon: BookOpen },
     { name: "Skills", href: "/skills", icon: Layers },
+    { name: "Training", href: "/training", icon: Dumbbell },
     { name: "Queries", href: "/queries", icon: MessageSquare },
+    { name: "Contact", href: "/contact", icon: Phone },
     { name: "Chat", href: "/chat", icon: MessageCircle },
     { name: "Chat Users", href: "/chat-user", icon: Users },
     { name: "Chat History", href: "/chat-history", icon: History },
-    { name: "Training", href: "/training", icon: Dumbbell },
-    { name: "Contact", href: "/contact", icon: Phone },
+    { name: "Code Log", href: "/code-log", icon: Code },
+    { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
+    { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
+    { name: "JSON Formatter", href: "/json-formatter", icon: Code },
+    { name: "Profile", href: "/profile", icon: User },
+    { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
   ];
 
   const handleLogout = () => {

@@ -19,6 +19,7 @@ import {
   Code,
   Timer,
   Target,
+  Library as LibraryIcon,
 } from "lucide-react";
 import { DollarSign } from "lucide-react";
 
@@ -29,6 +30,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
       items: [
         { name: "Dashboard", href: "/dashboard", icon: Home },
         { name: "Tasks", href: "/tasks", icon: Layers },
+        { name: "Library", href: "/library", icon: LibraryIcon },
         { name: "Notes", href: "/notes", icon: FileText },
         { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
       ],

@@ -17,7 +17,10 @@ import {
   Users,
   History,
   Code,
+  Timer,
+  Target,
 } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
   const menuGroups = [
@@ -31,13 +34,28 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
       ],
     },
     {
+      title: "Productivity",
+      items: [
+        { name: "Pomodoro Timer", href: "/pomodoro-timer", icon: Timer },
+        { name: "Goal Setting", href: "/goal-setting", icon: Target },
+      ],
+    },
+    {
       title: "Content Management",
       items: [
         { name: "About", href: "/about", icon: Info },
         { name: "Projects", href: "/projects", icon: FolderKanban },
         { name: "Blogs", href: "/blogs", icon: BookOpen },
+        { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
+        { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
         { name: "Skills", href: "/skills", icon: Layers },
         { name: "Training", href: "/training", icon: Dumbbell },
+      ],
+    },
+     {
+      title: "Finances",
+      items: [
+        { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
       ],
     },
     {
@@ -57,7 +75,10 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
     },
     {
       title: "Development",
-      items: [{ name: "Code Log", href: "/code-log", icon: Code }],
+      items: [
+        { name: "Code Log", href: "/code-log", icon: Code },
+        { name: "JSON Formatter", href: "/json-formatter", icon: FileText },
+      ],
     },
   ];
 

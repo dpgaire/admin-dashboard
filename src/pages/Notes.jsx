@@ -283,7 +283,7 @@ const Notes = () => {
             <Card
               key={note.id}
               className="
-        relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700
+        relative max-h-[400px] overflow-y-scroll rounded-xl border border-gray-200 dark:border-gray-700
         bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800
         shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1
         before:absolute before:inset-0

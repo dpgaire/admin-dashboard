@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
 import SidebarNav from "./SidebarNav";
+import CommandPalette from "./CommandPalette";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -222,6 +223,7 @@ const Layout = ({ children }) => {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+      <CommandPalette />
     </div>
   );
 };

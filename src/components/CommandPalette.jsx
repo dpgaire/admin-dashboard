@@ -11,6 +11,7 @@ import {
 import { FileText, Home, Layers, Link as LinkIcon, FolderKanban, BookOpen, Dumbbell, MessageSquare, Phone, MessageCircle, Users, History, Code, Info, User, Settings } from "lucide-react";
 import { Timer } from "lucide-react";
 import { Target } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 const CommandPalette = () => {
   const [open, setOpen] = useState(false);
@@ -55,6 +56,8 @@ const CommandPalette = () => {
     { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
     { name: "JSON Formatter", href: "/json-formatter", icon: Code },
     { name: "Profile", href: "/profile", icon: User },
+    { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
+    
   ];
 
   return (

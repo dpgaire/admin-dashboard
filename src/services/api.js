@@ -206,5 +206,13 @@ export const goalAPI = {
   deleteKeyResult: (goalId, krId) => api.delete(`/goals/${goalId}/key-results/${krId}`),
 };
 
+// Expense API
+export const expenseAPI = {
+  getAll: () => api.get('/expenses'),
+  create: (data) => api.post('/expenses', data),
+  update: (id, data) => api.put(`/expenses/${id}`, data),
+  delete: (id) => api.delete(`/expenses/${id}`),
+};
+
 export default api;
 

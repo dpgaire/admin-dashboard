@@ -32,6 +32,7 @@ import RichTextEditor from "./pages/RichTextEditor";
 import JsonFormatter from "./pages/JsonFormatter";
 import PomodoroTimer from "./pages/PomodoroTimer";
 import GoalSetting from "./pages/GoalSetting";
+import ExpenseTracker from "./pages/ExpenseTracker";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
                 <Route path="/json-formatter" element={<JsonFormatter />} />
                 <Route path="/pomodoro-timer" element={<PomodoroTimer />} />
                 <Route path="/goal-setting" element={<GoalSetting />} />
+                <Route path="/expense-tracker" element={<ExpenseTracker />} />
 
 
                 <Route

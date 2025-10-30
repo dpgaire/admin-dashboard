@@ -20,6 +20,7 @@ import {
   Timer,
   Target,
 } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
   const menuGroups = [
@@ -49,6 +50,12 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
         { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
         { name: "Skills", href: "/skills", icon: Layers },
         { name: "Training", href: "/training", icon: Dumbbell },
+      ],
+    },
+     {
+      title: "Finances",
+      items: [
+        { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
       ],
     },
     {

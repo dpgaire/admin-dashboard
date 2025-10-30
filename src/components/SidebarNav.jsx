@@ -59,7 +59,10 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
     },
     {
       title: "Development",
-      items: [{ name: "Code Log", href: "/code-log", icon: Code }],
+      items: [
+        { name: "Code Log", href: "/code-log", icon: Code },
+        { name: "JSON Formatter", href: "/json-formatter", icon: FileText },
+      ],
     },
   ];
 

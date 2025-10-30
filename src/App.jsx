@@ -29,6 +29,7 @@ import CodeLog from "./pages/CodeLog";
 import Tasks from "./pages/Tasks";
 import MarkdownEditor from "./pages/MarkdownEditor";
 import RichTextEditor from "./pages/RichTextEditor";
+import JsonFormatter from "./pages/JsonFormatter";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/md-to-pdf" element={<MarkdownEditor />} />
                 <Route path="/rich-text-editor" element={<RichTextEditor />} />
+                <Route path="/json-formatter" element={<JsonFormatter />} />
 
 
                 <Route

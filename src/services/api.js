@@ -195,5 +195,16 @@ export const tasksAPI = {
   delete: (id) => api.delete(`/tasks/${id}`),
 };
 
+// Goal Setting API
+export const goalAPI = {
+  getAll: () => api.get('/goals'),
+  create: (data) => api.post('/goals', data),
+  update: (id, data) => api.put(`/goals/${id}`, data),
+  delete: (id) => api.delete(`/goals/${id}`),
+  createKeyResult: (goalId, data) => api.post(`/goals/${goalId}/key-results`, data),
+  updateKeyResult: (goalId, krId, data) => api.put(`/goals/${goalId}/key-results/${krId}`, data),
+  deleteKeyResult: (goalId, krId) => api.delete(`/goals/${goalId}/key-results/${krId}`),
+};
+
 export default api;
 

@@ -17,6 +17,8 @@ import {
   Users,
   History,
   Code,
+  Timer,
+  Target,
 } from "lucide-react";
 
 const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
@@ -28,6 +30,13 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
         { name: "Tasks", href: "/tasks", icon: Layers },
         { name: "Notes", href: "/notes", icon: FileText },
         { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
+      ],
+    },
+    {
+      title: "Productivity",
+      items: [
+        { name: "Pomodoro Timer", href: "/pomodoro-timer", icon: Timer },
+        { name: "Goal Setting", href: "/goal-setting", icon: Target },
       ],
     },
     {

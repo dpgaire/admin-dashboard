@@ -30,6 +30,8 @@ import Tasks from "./pages/Tasks";
 import MarkdownEditor from "./pages/MarkdownEditor";
 import RichTextEditor from "./pages/RichTextEditor";
 import JsonFormatter from "./pages/JsonFormatter";
+import PomodoroTimer from "./pages/PomodoroTimer";
+import GoalSetting from "./pages/GoalSetting";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -68,6 +70,8 @@ const AuthenticatedApp = () => {
                 <Route path="/md-to-pdf" element={<MarkdownEditor />} />
                 <Route path="/rich-text-editor" element={<RichTextEditor />} />
                 <Route path="/json-formatter" element={<JsonFormatter />} />
+                <Route path="/pomodoro-timer" element={<PomodoroTimer />} />
+                <Route path="/goal-setting" element={<GoalSetting />} />
 
 
                 <Route

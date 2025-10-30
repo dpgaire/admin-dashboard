@@ -9,6 +9,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { FileText, Home, Layers, Link as LinkIcon, FolderKanban, BookOpen, Dumbbell, MessageSquare, Phone, MessageCircle, Users, History, Code, Info, User, Settings } from "lucide-react";
+import { Timer } from "lucide-react";
+import { Target } from "lucide-react";
 
 const CommandPalette = () => {
   const [open, setOpen] = useState(false);
@@ -38,6 +40,8 @@ const CommandPalette = () => {
     { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
     { name: "About", href: "/about", icon: Info },
     { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Pomodoro Timer", href: "/pomodoro-timer", icon: Timer },
+    { name: "Goal Setting", href: "/goal-setting", icon: Target },
     { name: "Blogs", href: "/blogs", icon: BookOpen },
     { name: "Skills", href: "/skills", icon: Layers },
     { name: "Training", href: "/training", icon: Dumbbell },

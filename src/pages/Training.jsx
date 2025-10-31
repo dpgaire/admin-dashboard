@@ -48,8 +48,6 @@ const Training = () => {
     },
   });
 
-  console.log("trainingData", trainingData);
-
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,

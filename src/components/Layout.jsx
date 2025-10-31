@@ -22,21 +22,34 @@ import {
   Link as LinkIcon,
   History,
   Code,
+  DollarSign,
+  Timer,
+  Target,
+  Settings,
+  LibraryIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "../context/AuthContext";
 import SidebarNav from "./SidebarNav";
 import CommandPalette from "./CommandPalette";
-import { DollarSign } from "lucide-react";
-import { Timer } from "lucide-react";
-import { Target } from "lucide-react";
-import { LibraryIcon } from "lucide-react";
+
+// ✅ Dropdown imports (from shadcn/ui or Radix UI)
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Initialize darkMode from localStorage
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem("darkMode");
     return savedMode === "true";
@@ -77,19 +90,12 @@ const Layout = ({ children }) => {
     navigate("/login");
   };
 
-  // Sync darkMode with localStorage and document class
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
   const isCurrentPath = (path) => location.pathname === path;
 
@@ -99,10 +105,10 @@ const Layout = ({ children }) => {
         {/* Sidebar */}
         <div
           className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 lg:static lg:inset-0
-        `}
+            fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            lg:translate-x-0 lg:static lg:inset-0
+          `}
         >
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
             <h1 className="text-xl font-bold text-gray-900 cursor-pointer dark:text-white">
@@ -127,34 +133,43 @@ const Layout = ({ children }) => {
             isCurrentPath={isCurrentPath}
           />
 
-          {/* User info at bottom of sidebar */}
+          {/* User info at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <Link to="/profile">
-              <div className="flex items-center space-x-3 cursor-pointer">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={user.fullName}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarFallback className="bg-blue-500 text-white">
-                      {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {user?.fullName || "Admin User"}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user?.email || "admin@example.com"}
-                  </p>
+            <div className="flex justify-between items-center">
+              <Link to="/profile">
+                <div className="flex items-center space-x-3 cursor-pointer">
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.fullName}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <Avatar className="h-8 w-8 cursor-pointer">
+                      <AvatarFallback className="bg-blue-500 text-white">
+                        {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {user?.fullName || "Admin User"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {user?.email || "admin@example.com"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/settings")}
+                className="text-gray-500 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -176,6 +191,7 @@ const Layout = ({ children }) => {
                 </h2>
               </div>
 
+              {/* Right section: dark mode + profile dropdown */}
               <div className="flex items-center space-x-4">
                 {/* Dark mode toggle */}
                 <Button
@@ -191,32 +207,42 @@ const Layout = ({ children }) => {
                   )}
                 </Button>
 
-                {/* User menu */}
-                <div className="flex items-center space-x-3">
-                  <Link to="/profile">
-                    {user.image ? (
-                      <img
-                        src={user.image}
-                        alt={user.fullName}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <Avatar className="h-8 w-8 cursor-pointer">
-                        <AvatarFallback className="bg-blue-500 text-white">
-                          {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
-                        </AvatarFallback>
+                {/* Profile Dropdown */}
+                <DropdownMenu onOpenChange={setMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center space-x-2 focus:outline-none cursor-pointer">
+                      <Avatar className="h-8 w-8 ">
+                        {user?.image ? (
+                          <AvatarImage src={user.image} alt={user.fullName} />
+                        ) : (
+                          <AvatarFallback className="bg-blue-500 text-white">
+                            {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
-                    )}
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
+                      {menuOpen ? (
+                        <ChevronUp className="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className="w-48" align="end">
+                    <DropdownMenuLabel>
+                      {user?.fullName || "User"}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </header>

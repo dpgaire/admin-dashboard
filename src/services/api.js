@@ -215,12 +215,34 @@ export const expenseAPI = {
 };
 
 // Library API
+
 export const libraryAPI = {
+
   getAll: () => api.get('/library'),
+
   create: (data) => api.post('/library', data),
+
   update: (id, data) => api.put(`/library/${id}`, data),
+
   delete: (id) => api.delete(`/library/${id}`),
+
 };
 
+
+
+// Settings API
+
+export const settingsAPI = {
+
+  getAll: () => api.get('/settings'),
+
+  update: (data) => api.put('/settings', data),
+
+};
+
+
+
 export default api;
+
+
 

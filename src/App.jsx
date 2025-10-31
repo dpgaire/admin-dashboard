@@ -34,6 +34,7 @@ import PomodoroTimer from "./pages/PomodoroTimer";
 import GoalSetting from "./pages/GoalSetting";
 import ExpenseTracker from "./pages/ExpenseTracker";
 import Library from "./pages/Library";
+import Settings from "./pages/Settings";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -76,7 +77,7 @@ const AuthenticatedApp = () => {
                 <Route path="/goal-setting" element={<GoalSetting />} />
                 <Route path="/expense-tracker" element={<ExpenseTracker />} />
                 <Route path="/library" element={<Library />} />
-
+                <Route path="/settings" element={<Settings />} />
 
                 <Route
                   path="/"

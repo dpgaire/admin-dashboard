@@ -76,6 +76,7 @@ const CommandPalette = () => {
     { name: "JSON Formatter", href: "/json-formatter", icon: Code },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
+    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   return (

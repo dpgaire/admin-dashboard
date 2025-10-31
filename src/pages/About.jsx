@@ -1,412 +1,781 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, FolderOpen, Save } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Briefcase,
+  BarChart,
+  Mail,
+  Phone,
+  MapPin,
+  Sparkles,
+  Target,
+  Lightbulb,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { aboutAPI } from "../services/api";
 import { aboutSchema } from "../utils/validationSchemas";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { Minimize } from "lucide-react";
+import { Maximize } from "lucide-react";
+
+const emptyAbout = {
+  title: "",
+  tagline: "",
+  description: "",
+  philosophy: "",
+  tags: [],
+  areasOfExpertise: [],
+  stats: [],
+  contactDetails: {
+    email: "",
+    phone: "",
+    location: "",
+    profileImage: "",
+    cv: "",
+  },
+};
 
 const About = () => {
   const queryClient = useQueryClient();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingAbout, setEditingAbout] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // let isLoading = false
-
-  const { data: aboutData = [], isLoading } = useQuery({
+  const { data: aboutData, isLoading } = useQuery({
     queryKey: ["about"],
     queryFn: async () => {
       const response = await aboutAPI.getAll();
-      return response.data || [];
+      return response.data && response.data.length > 0
+        ? response.data[0]
+        : null;
     },
     onError: (error) => {
       console.error("Error fetching about:", error);
-      toast.error("Failed to load about");
+      toast.error("Failed to load about information");
     },
   });
 
   const {
-    register: registerCreate,
-    handleSubmit: handleSubmitCreate,
-    formState: { errors: errorsCreate },
-    reset: resetCreate,
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(aboutSchema),
+    defaultValues: aboutData || emptyAbout,
   });
 
+  useEffect(() => {
+    reset(aboutData || emptyAbout);
+  }, [aboutData, reset]);
+
   const {
-    register: registerEdit,
-    handleSubmit: handleSubmitEdit,
-    formState: { errors: errorsEdit },
-    reset: resetEdit,
-  } = useForm({
-    resolver: yupResolver(aboutSchema),
-  });
+    fields: tagsFields,
+    append: appendTag,
+    remove: removeTag,
+  } = useFieldArray({ control, name: "tags" });
+
+  const {
+    fields: expertiseFields,
+    append: appendExpertise,
+    remove: removeExpertise,
+  } = useFieldArray({ control, name: "areasOfExpertise" });
+
+  const {
+    fields: statsFields,
+    append: appendStat,
+    remove: removeStat,
+  } = useFieldArray({ control, name: "stats" });
 
   const createMutation = useMutation({
     mutationFn: aboutAPI.create,
     onSuccess: () => {
-      toast.success("About created successfully!");
-      setIsCreateModalOpen(false);
-      resetCreate();
+      toast.success("About information created successfully!");
+      setIsModalOpen(false);
       queryClient.invalidateQueries(["about"]);
     },
     onError: (error) => {
-      const message = error.response?.data?.message || "Failed to create about";
+      const message =
+        error.response?.data?.message || "Failed to create about information";
       toast.error(message);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => aboutAPI.update(id, data),
+    mutationFn: (data) => aboutAPI.update(aboutData.id, data),
     onSuccess: () => {
-      toast.success("Category updated successfully!");
-      setIsEditModalOpen(false);
-      setEditingAbout(null);
-      resetEdit();
-      queryClient.invalidateQueries(["categories"]);
-    },
-    onError: (error) => {
-      const message =
-        error.response?.data?.message || "Failed to update category";
-      toast.error(message);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: aboutAPI.delete,
-    onSuccess: () => {
-      toast.success("Category deleted successfully!");
+      toast.success("About information updated successfully!");
+      setIsModalOpen(false);
       queryClient.invalidateQueries(["about"]);
     },
     onError: (error) => {
       const message =
-        error.response?.data?.message || "Failed to delete category";
+        error.response?.data?.message || "Failed to update about information";
       toast.error(message);
     },
   });
 
-  const handleCreateAbout = (data) => {
-    createMutation.mutate(data);
-  };
-
-  const handleEditAbout = (data) => {
-    updateMutation.mutate({ id: editingAbout.id, data });
-  };
-
-  const handleDeleteAbout = (aboutId) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this item? This will also delete all associated subcategories and items."
-      )
-    ) {
-      return;
+  const handleSaveAbout = (data) => {
+    if (aboutData) {
+      updateMutation.mutate(data);
+    } else {
+      createMutation.mutate(data);
     }
-    deleteMutation.mutate(aboutId);
   };
 
-  const openEditModal = (about) => {
-    setEditingAbout(about);
-    resetEdit({
-      title: about.title,
-      description: about.description || "",
-    });
-    setIsEditModalOpen(true);
+  const toggleFullScreen = () => {
+    const iframe = document.getElementById(`pdf-iframe`);
+    if (iframe) {
+      if (!isFullScreen) {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.mozRequestFullScreen) {
+          /* Firefox */
+          iframe.mozRequestFullScreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          /* Chrome, Safari and Opera */
+          iframe.webkitRequestFullscreen();
+        } else if (iframe.msRequestFullscreen) {
+          /* IE/Edge */
+          iframe.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          /* Firefox */
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          /* Chrome, Safari and Opera */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          /* IE/Edge */
+          document.msExitFullscreen();
+        }
+      }
+      setIsFullScreen(!isFullScreen);
+    }
   };
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            About Section
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage content about for organizing materials
-          </p>
-        </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Add About</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create New About</DialogTitle>
-              <DialogDescription>
-                Add a new about to organize content
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={handleSubmitCreate(handleCreateAbout)}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <Label htmlFor="create-title">Title</Label>
-                <div className="relative">
-                  <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="create-title"
-                    placeholder="Enter title"
-                    className="pl-10"
-                    {...registerCreate("title")}
-                  />
-                </div>
-                {errorsCreate.title && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.title.message}
-                  </p>
-                )}
-              </div>
+  const renderForm = () => (
+    <ScrollArea className="h-[75vh] w-full pr-4">
+      <form onSubmit={handleSubmit(handleSaveAbout)}>
+        {/* Basic Information */}
+        <Card className="border-2 rounded-none shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Basic Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5 pt-6">
+            <div>
+              <Label htmlFor="title" className="text-sm font-semibold">
+                Title
+              </Label>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="e.g., John Doe – Senior Full Stack Developer"
+                className="mt-1"
+              />
+              {errors.title && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="create-description">Description</Label>
-                <Textarea
-                  id="create-description"
-                  placeholder="Enter description"
-                  rows={3}
-                  {...registerCreate("description")}
-                />
-                {errorsCreate.description && (
-                  <p className="text-sm text-red-600">
-                    {errorsCreate.description.message}
-                  </p>
-                )}
-              </div>
+            <div>
+              <Label htmlFor="tagline" className="text-sm font-semibold">
+                Tagline
+              </Label>
+              <Input
+                id="tagline"
+                {...register("tagline")}
+                placeholder="e.g., Building the future, one line at a time"
+                className="mt-1"
+              />
+              {errors.tagline && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.tagline.message}
+                </p>
+              )}
+            </div>
 
-              <div className="flex items-center space-x-2 pt-4">
-                <Button
-                  type="submit"
-                  disabled={createMutation.isLoading}
+            <div>
+              <Label htmlFor="description" className="text-sm font-semibold">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                {...register("description")}
+                placeholder="Tell us about your journey..."
+                rows={4}
+                className="mt-1 resize-none"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="philosophy" className="text-sm font-semibold">
+                Philosophy
+              </Label>
+              <Textarea
+                id="philosophy"
+                {...register("philosophy")}
+                placeholder="Your core beliefs and approach..."
+                rows={3}
+                className="mt-1 resize-none"
+              />
+              {errors.philosophy && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.philosophy.message}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tags */}
+        <Card className="border-2 rounded-none shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Badge className="h-5 w-5 p-0 flex items-center justify-center">
+                T
+              </Badge>
+              Tags
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-4">
+            {tagsFields.map((field, index) => (
+              <div key={field.id} className="flex gap-2">
+                <Input
+                  {...register(`tags.${index}`)}
+                  placeholder="e.g., React, TypeScript"
                   className="flex-1"
-                >
-                  {createMutation.isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Creating...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Save className="h-4 w-4" />
-                      <span>Create</span>
-                    </div>
-                  )}
-                </Button>
+                />
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  disabled={createMutation.isLoading}
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => removeTag(index)}
+                  className="shrink-0"
                 >
-                  Cancel
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>About Section </CardTitle>
-          <CardDescription>
-            Manage content about and their descriptions
-          </CardDescription>
-        </CardHeader>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendTag("")}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-1" /> Add Tag
+            </Button>
+            {errors.tags && (
+              <p className="text-red-500 text-xs">{errors.tags.message}</p>
+            )}
+          </CardContent>
+        </Card>
 
-        <CardContent>
-          {aboutData.length > 0 ? (
-            aboutData.map((item, index) => (
+        {/* Areas of Expertise */}
+        <Card className="border-2 rounded-none shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Briefcase className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              Areas of Expertise
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4">
+            {expertiseFields.map((field, index) => (
+              <Card key={field.id} className="p-4 border">
+                <div className="space-y-3">
+                  <Input
+                    {...register(`areasOfExpertise.${index}.title`)}
+                    placeholder="Area Title (e.g., Frontend Development)"
+                  />
+                  <Textarea
+                    {...register(`areasOfExpertise.${index}.description`)}
+                    placeholder="Describe your expertise..."
+                    rows={2}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => removeExpertise(index)}
+                    className="w-fit"
+                  >
+                    Remove Area
+                  </Button>
+                </div>
+              </Card>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendExpertise({ title: "", description: "" })}
+              className="fit"
+            >
+              <Plus className="h-4 w-4 mr-1" /> Add Expertise
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Stats */}
+        <Card className="border-2 rounded-none shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <BarChart className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              Key Stats
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4">
+            {statsFields.map((field, index) => (
               <div
-                key={index}
-                className="max-w-full mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+                key={field.id}
+                className="p-4 border space-y-3 bg-gray-50 dark:bg-gray-800"
               >
-                {/* Top Banner / Profile Section */}
-                <div className="relative w-full h-40 sm:h-48 bg-gradient-to-r from-blue-500 to-indigo-600">
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-                    <img
-                      src={
-                        "https://dpgaire.github.io/image-server/projects/durga.png"
-                      }
-                      alt={item.title}
-                      className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-gray-800 shadow-lg object-cover"
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Title</Label>
+                    <Input
+                      {...register(`stats.${index}.title`)}
+                      placeholder="e.g., Projects Completed"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Count</Label>
+                    <Input
+                      {...register(`stats.${index}.count`)}
+                      placeholder="e.g., 50+"
                     />
                   </div>
                 </div>
-
-                {/* Main Content */}
-                <div className="pt-20 pb-8 px-6 sm:px-10 text-center">
-                  {/* Title + Action Buttons */}
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {item.title}
-                      </h2>
-                      <p className="text-sm text-left text-gray-500 dark:text-gray-400 mt-1">
-                        Updated on {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    <div className="flex justify-center sm:justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditModal(item)}
-                        className="hover:bg-blue-50 dark:hover:bg-gray-700"
-                      >
-                        <Edit className="h-4 w-4 text-blue-500" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteAbout(item.id)}
-                        className="hover:bg-red-50 dark:hover:bg-gray-700"
-                        disabled={deleteMutation.isLoading}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-base text-left sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
-                    {item.description}
-                  </p>
-
-                  {/* Info Boxes */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
-                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow-sm">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Created
-                      </p>
-                      <p className="text-base font-semibold text-gray-800 dark:text-white">
-                        {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl shadow-sm">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Status
-                      </p>
-                      <p className="text-base font-semibold text-green-600 dark:text-green-400">
-                        Active
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeStat(index)}
+                  className="w-fit"
+                >
+                  Remove Stat
+                </Button>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <FolderOpen className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-600 mb-3" />
-              <p className="text-gray-500 dark:text-gray-400">
-                No About information found.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => appendStat({ title: "", count: "" })}
+              className="w-fit"
+            >
+              <Plus className="h-4 w-4 mr-1" /> Add Stat
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* Edit Category Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit About</DialogTitle>
-            <DialogDescription>Update about information</DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={handleSubmitEdit(handleEditAbout)}
-            className="space-y-4"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Title</Label>
-              <div className="relative">
-                <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="edit-name"
-                  placeholder="Enter title"
-                  className="pl-10"
-                  {...registerEdit("title")}
-                />
-              </div>
-              {errorsEdit.name && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description (Optional)</Label>
-              <Textarea
-                id="edit-description"
-                placeholder="Enter  description"
-                rows={3}
-                {...registerEdit("description")}
+        {/* Contact Details */}
+        <Card className="border-2 rounded-none shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-gray-800 dark:to-gray-900">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Mail className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+              Contact Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5 pt-6">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                {...register("contactDetails.email")}
+                placeholder="you@example.com"
+                className="mt-1"
               />
-              {errorsEdit.description && (
-                <p className="text-sm text-red-600">
-                  {errorsEdit.description.message}
+              {errors.contactDetails?.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.email.message}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center space-x-2 pt-4">
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                {...register("contactDetails.phone")}
+                placeholder="+1 (555) 000-0000"
+                className="mt-1"
+              />
+              {errors.contactDetails?.phone && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.phone.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                {...register("contactDetails.location")}
+                placeholder="San Francisco, CA"
+                className="mt-1"
+              />
+              {errors.contactDetails?.location && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.location.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="profileImage">Profile Image URL</Label>
+              <Input
+                id="profileImage"
+                {...register("contactDetails.profileImage")}
+                placeholder="https://example.com/avatar.jpg"
+                className="mt-1"
+              />
+              {errors.contactDetails?.profileImage && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.profileImage.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="cv">Latest CV</Label>
+              <Input
+                id="cv"
+                {...register("contactDetails.cv")}
+                placeholder="https://durga_cv.pdf"
+                className="mt-1"
+              />
+              {errors.contactDetails?.cv && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.cv.message}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 pt-6 pb-4 sticky bottom-0 bg-white dark:bg-gray-900 border-t -mx-6 px-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsModalOpen(false)}
+            size="lg"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className="min-w-32"
+          >
+            {createMutation.isPending || updateMutation.isPending ? (
+              <>
+                <LoadingSpinner className="h-4 w-4 mr-2" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </ScrollArea>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors">
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+              About Section
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Manage your professional profile and expertise
+            </p>
+          </div>
+
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
               <Button
-                type="submit"
-                disabled={updateMutation.isLoading}
-                className="flex-1"
+                size="lg"
+                onClick={() => reset(aboutData || emptyAbout)}
+                className="shadow-lg hover:shadow-xl transition-shadow"
               >
-                {updateMutation.isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Updating...</span>
-                  </div>
+                {aboutData ? (
+                  <>
+                    <Edit className="h-5 w-5 mr-2" />
+                    Edit Profile
+                  </>
                 ) : (
-                  <div className="flex items-center space-x-2">
-                    <Save className="h-4 w-4" />
-                    <span>Update About</span>
-                  </div>
+                  <>
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create Profile
+                  </>
                 )}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsEditModalOpen(false)}
-                disabled={updateMutation.isLoading}
-              >
-                Cancel
-              </Button>
+            </DialogTrigger>
+            <DialogContent  className={`sm:max-w-4xl ${
+                              isFullScreen ? "w-screen h-screen max-w-none" : ""
+                            }`}>
+              {renderForm()}
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Profile Display */}
+        {aboutData ? (
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Main Profile Card */}
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
+                {/* Hero Section */}
+                <div className="relative h-48 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500">
+                  <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+                    <Avatar className="h-32 w-32 ring-8 ring-white dark:ring-gray-900 shadow-2xl">
+                      <AvatarImage
+                        src={aboutData.contactDetails?.profileImage}
+                        alt={aboutData.title}
+                      />
+
+                      <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                        {aboutData.title?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {aboutData.contactDetails?.cv && (
+                      <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400 mt-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="relative mt-2 px-5 py-2 font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-md shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer"
+                            >
+                              <FileText className="h-4 w-4 mr-2" /> View CV
+                            </Button>
+                          </DialogTrigger>
+
+                          <DialogContent
+                            className={`sm:max-w-4xl ${
+                              isFullScreen ? "w-screen h-screen max-w-none" : ""
+                            }`}
+                          >
+                            <DialogHeader className="flex flex-row justify-between items-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={toggleFullScreen}
+                              >
+                                {isFullScreen ? (
+                                  <Minimize className="h-4 w-4" />
+                                ) : (
+                                  <Maximize className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </DialogHeader>
+                            <div
+                              className={`h-[80vh] ${
+                                isFullScreen ? "h-[calc(100vh-80px)]" : ""
+                              }`}
+                            >
+                              <iframe
+                                id="pdf-iframe"
+                                src={aboutData.contactDetails.cv}
+                                className="w-full h-full"
+                                title="CV"
+                              ></iframe>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <CardContent className="pt-20 pb-8 space-y-6">
+                  <div className="text-center">
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {aboutData.title}
+                    </h2>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 mt-1">
+                      {aboutData.tagline}
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-3">
+                      {aboutData.tags?.map((tag, i) => (
+                        <Badge
+                          key={i}
+                          variant="secondary"
+                          className="font-medium"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                      About
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {aboutData.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      Philosophy
+                    </h3>
+                    <blockquote className="italic text-lg text-gray-600 dark:text-gray-400 border-l-4 border-blue-500 pl-4">
+                      "{aboutData.philosophy}"
+                    </blockquote>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Expertise */}
+              {aboutData.areasOfExpertise?.length > 0 && (
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5" />
+                      Expertise
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {aboutData.areasOfExpertise.map((area) => (
+                      <div
+                        key={area.title}
+                        className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700"
+                      >
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          {area.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {area.description}
+                        </p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Stats */}
+              {aboutData.stats?.length > 0 && (
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart className="h-5 w-5" />
+                      Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3">
+                      {aboutData.stats.map((stat) => (
+                        <div
+                          key={stat.title}
+                          className="text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-800"
+                        >
+                          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            {stat.count}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            {stat.title}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Contact */}
+              <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+                <h3 className="text-xl font-semibold mb-2">Contact Me</h3>
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
+                  <Mail />{" "}
+                  <a href={`mailto:${aboutData.contactDetails?.email}`}>
+                    {aboutData.contactDetails?.email}
+                  </a>
+                </div>
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400 mt-2">
+                  <Phone /> <span>{aboutData.contactDetails?.phone}</span>
+                </div>
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400 mt-2">
+                  <MapPin /> <span>{aboutData.contactDetails?.location}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Card className="border-dashed border-2">
+            <CardContent className="p-16 text-center">
+              <div className="bg-gray-200 dark:bg-gray-700 border-2 border-dashed rounded-xl w-24 h-24 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                No Profile Yet
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">
+                Click the button above to create your professional profile.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

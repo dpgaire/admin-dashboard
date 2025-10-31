@@ -135,7 +135,7 @@ const Library = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Library</h1>
-          <p className="text-gray-500">Manage your PDF library</p>
+          <p className="text-gray-500">Manage your book library</p>
         </div>
         <AddLibraryModal
           isOpen={isCreateModalOpen}
@@ -147,7 +147,7 @@ const Library = () => {
           isLoading={createMutation.isLoading}
         />
         <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add PDF
+          <Plus className="mr-2 h-4 w-4" /> Add Book
         </Button>
       </div>
 
@@ -167,13 +167,13 @@ const Library = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>All PDFs ({libraryData.length})</CardTitle>
-          <CardDescription>Browse and manage your PDFs</CardDescription>
+          <CardTitle>All Books ({libraryData.length})</CardTitle>
+          <CardDescription>Browse and manage your books</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredLibrary.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">No PDFs found.</p>
+              <p className="text-gray-500">No book found.</p>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

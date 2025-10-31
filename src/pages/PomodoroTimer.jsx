@@ -95,8 +95,8 @@ const PomodoroTimer = () => {
       new Notification("Pomodoro Session Complete!", {
         body:
           sessionType === "work"
-            ? "Time for a break! 🎉"
-            : "Break’s over, back to work! 💪",
+            ? "Time for a break!"
+            : "Break’s over, back to work!",
         icon: "/favicon.ico",
       });
     }
@@ -118,7 +118,6 @@ const PomodoroTimer = () => {
   };
 
   const toggleTimer = () => setIsActive((prev) => !prev);
-
   const resetTimer = () => {
     setIsActive(false);
     setSessionType("work");
@@ -149,19 +148,20 @@ const PomodoroTimer = () => {
       ? settings.shortBreak * 60
       : settings.longBreak * 60;
 
-  const progress = (1 - time / totalSeconds) * 816; // <-- updated from 283 to 816
+  const progress = (1 - time / totalSeconds) * 816;
 
   return (
     <div
       className={clsx(
-        "min-h-screen flex flex-col items-center justify-center transition-colors duration-300 px-6 py-10",
-        "bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100"
+        "min-h-[calc(100vh-120px)] flex flex-col items-center justify-center transition-colors duration-300",
+        "bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100",
+        "px-4 py-8 sm:px-6 md:px-8"
       )}
     >
-      <div className="max-w-6xl w-full text-center space-y-8">
+      <div className="w-full max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
         <Card className="border dark:border-neutral-800 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl text-center font-semibold capitalize">
+            <CardTitle className="text-xl sm:text-2xl font-semibold capitalize">
               {sessionType === "work"
                 ? "Focus Time"
                 : sessionType === "shortBreak"
@@ -170,11 +170,9 @@ const PomodoroTimer = () => {
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="flex flex-col items-center gap-8 py-8">
-            {/* Circular Progress */}
-            <div className="relative w-96 h-96">
-              {" "}
-              {/* Increased size */}
+          <CardContent className="flex flex-col items-center gap-6 sm:gap-8 py-6 sm:py-8">
+            {/* Responsive Circular Progress */}
+            <div className="relative w-72 h-72 sm:w-96 sm:h-96">
               <svg
                 viewBox="0 0 300 300"
                 className="w-full h-full transform -rotate-90"
@@ -188,9 +186,10 @@ const PomodoroTimer = () => {
                   strokeOpacity="0.2"
                   strokeWidth="12"
                   fill="none"
+                  className="text-gray-300 dark:text-gray-700"
                 />
 
-                {/* Animated Progress Circle */}
+                {/* Progress Circle */}
                 <motion.circle
                   cx="150"
                   cy="150"
@@ -199,50 +198,51 @@ const PomodoroTimer = () => {
                   strokeWidth="12"
                   fill="none"
                   stroke="currentColor"
-                  strokeDasharray="816" // 2 * Math.PI * 130
+                  strokeDasharray="816"
                   strokeDashoffset={816 - progress}
                   animate={{ strokeDashoffset: 816 - progress }}
                   transition={{ ease: "easeOut", duration: 0.5 }}
                   className="text-blue-600 dark:text-blue-400 drop-shadow-md"
                 />
               </svg>
-              {/* Timer Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-7xl font-extrabold">
+
+              {/* Timer Text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+                <span className="text-5xl sm:text-7xl font-extrabold leading-tight">
                   {formatTime(time)}
                 </span>
-                <span className="text-base opacity-70 mt-3">
+                <span className="text-sm sm:text-base opacity-70 mt-2">
                   Pomodoros: {pomodoroCount}
                 </span>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button onClick={toggleTimer} size="lg">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+              <Button onClick={toggleTimer} size="lg" className="min-w-32">
                 {isActive ? (
                   <>
-                    <Pause className="mr-2" /> Pause
+                    <Pause className="mr-2 h-5 w-5" /> Pause
                   </>
                 ) : (
                   <>
-                    <Play className="mr-2" /> Start
+                    <Play className="mr-2 h-5 w-5" /> Start
                   </>
                 )}
               </Button>
 
-              <Button onClick={resetTimer} variant="outline" size="lg">
-                <RefreshCw className="mr-2" /> Reset
+              <Button onClick={resetTimer} variant="outline" size="lg" className="min-w-32">
+                <RefreshCw className="mr-2 h-5 w-5" /> Reset
               </Button>
 
               <Dialog open={showSettings} onOpenChange={setShowSettings}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="lg">
-                    <Settings className="mr-2" /> Settings
+                  <Button variant="outline" size="lg" className="min-w-32">
+                    <Settings className="mr-2 h-5 w-5" /> Settings
                   </Button>
                 </DialogTrigger>
 
-                <DialogContent className="max-w-md bg-white dark:bg-neutral-900 border dark:border-neutral-800">
+                <DialogContent className="max-w-sm sm:max-w-md bg-white dark:bg-neutral-900">
                   <DialogHeader>
                     <DialogTitle>Pomodoro Settings</DialogTitle>
                   </DialogHeader>
@@ -254,7 +254,7 @@ const PomodoroTimer = () => {
                       "longBreakInterval",
                     ].map((key) => (
                       <div key={key}>
-                        <Label htmlFor={key} className="font-semibold">
+                        <Label htmlFor={key} className="font-semibold text-sm">
                           {key
                             .replace(/([A-Z])/g, " $1")
                             .replace(/^./, (s) => s.toUpperCase())}{" "}
@@ -271,21 +271,21 @@ const PomodoroTimer = () => {
                       </div>
                     ))}
                     <Button onClick={applySettings} className="w-full">
-                      <CheckCircle2 className="mr-2" /> Save & Close
+                      <CheckCircle2 className="mr-2 h-4 w-4" /> Save & Close
                     </Button>
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
 
-            {/* Quote */}
+            {/* Motivational Quote */}
             <AnimatePresence mode="wait">
               <motion.p
                 key={quote}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="italic text-lg mt-6 text-gray-600 dark:text-gray-400"
+                className="italic text-base sm:text-lg mt-4 text-gray-600 dark:text-gray-400 max-w-md mx-auto px-4"
               >
                 “{quote}”
               </motion.p>
@@ -293,8 +293,8 @@ const PomodoroTimer = () => {
           </CardContent>
         </Card>
 
-        <div className="text-sm text-gray-500 dark:text-gray-400 mt-6">
-          🔔 Notifications {permissionGranted ? "enabled" : "off"} | Focus App
+        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4">
+          Notifications {permissionGranted ? "enabled" : "off"} | Focus App
         </div>
       </div>
 

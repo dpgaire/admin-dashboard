@@ -31,6 +31,7 @@ import CommandPalette from "./CommandPalette";
 import { DollarSign } from "lucide-react";
 import { Timer } from "lucide-react";
 import { Target } from "lucide-react";
+import { LibraryIcon } from "lucide-react";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,6 +50,7 @@ const Layout = ({ children }) => {
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Tasks", href: "/tasks", icon: Layers },
     { name: "Notes", href: "/notes", icon: FileText },
+    { name: "Library", href: "/library", icon: LibraryIcon },
     { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },
     { name: "About", href: "/about", icon: Info },
     { name: "Projects", href: "/projects", icon: FolderKanban },

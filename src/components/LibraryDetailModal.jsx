@@ -50,7 +50,7 @@ const LibraryDetailModal = ({ libraryItem }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button className='cursor-pointer' variant="ghost" size="sm">
           <Eye className="h-4 w-4 mr-2" /> View
         </Button>
       </DialogTrigger>

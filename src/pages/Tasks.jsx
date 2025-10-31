@@ -123,8 +123,6 @@ const Tasks = () => {
 
   const handleCreateTask = (data) => {
     createTaskMutation.mutate(data);
-    console.log("loading state", createTaskMutation.isLoading);
-
     setEditingTask(null);
   };
 
@@ -153,9 +151,7 @@ const Tasks = () => {
     setEditingTask(task);
     setIsEditModalOpen(true);
   };
-
-  console.log("loading state", createTaskMutation.isLoading);
-
+  
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;

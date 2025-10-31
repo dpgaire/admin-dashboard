@@ -64,8 +64,6 @@ const Notes = () => {
     },
   });
 
-  console.log('notes',notes)
-
   const updateNote = useMutation({
     mutationFn: (data) => notesAPI.update(editingNote.id, data),
     onSuccess: () => {

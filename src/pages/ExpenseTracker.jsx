@@ -46,6 +46,8 @@ const ExpenseTracker = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [deleteExpenseId, setDeleteExpenseId] = useState(null);
+  const [selectedType, setSelectedType] = useState("expense");
+  const [formData, setFormData] = useState({}); // Track form data
 
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses"],
@@ -63,6 +65,8 @@ const ExpenseTracker = () => {
       toast.success("Expense added successfully");
       setIsFormOpen(false);
       setEditingExpense(null);
+      setSelectedType("expense");
+      setFormData({});
     },
     onError: () => toast.error("Failed to add expense"),
   });
@@ -74,6 +78,8 @@ const ExpenseTracker = () => {
       toast.success("Expense updated successfully");
       setIsFormOpen(false);
       setEditingExpense(null);
+      setSelectedType("expense");
+      setFormData({});
     },
     onError: () => toast.error("Failed to update expense"),
   });
@@ -89,15 +95,36 @@ const ExpenseTracker = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
+    const data = { ...formData };
     data.amount = parseFloat(data.amount);
+
+    // Only include loanType if type is expense and selected
+    if (data.type !== "expense") {
+      delete data.loanType;
+    }
 
     if (editingExpense) {
       updateExpense.mutate({ id: editingExpense.id, data });
     } else {
       createExpense.mutate(data);
     }
+  };
+
+  // Update form data when type or loanType changes
+  const handleTypeChange = (value) => {
+    setSelectedType(value);
+    setFormData((prev) => ({ ...prev, type: value }));
+    if (value !== "expense") {
+      setFormData((prev) => {
+        const newData = { ...prev };
+        delete newData.loanType;
+        return newData;
+      });
+    }
+  };
+
+  const handleLoanTypeChange = (value) => {
+    setFormData((prev) => ({ ...prev, loanType: value || "" }));
   };
 
   const confirmDeleteExpense = () => {
@@ -111,7 +138,9 @@ const ExpenseTracker = () => {
   const filteredExpenses = expenses.filter(
     (expense) =>
       expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expense.category.toLowerCase().includes(searchTerm.toLowerCase())
+      expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (expense.loanType &&
+        expense.loanType.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalIncome = filteredExpenses
@@ -124,6 +153,21 @@ const ExpenseTracker = () => {
 
   const netBalance = totalIncome - totalExpenses;
 
+  // Initialize form data when editing
+  React.useEffect(() => {
+    if (editingExpense) {
+      setFormData({
+        description: editingExpense.description,
+        amount: editingExpense.amount,
+        type: editingExpense.type,
+        category: editingExpense.category,
+        date: editingExpense.date.split("T")[0],
+        loanType: editingExpense.loanType || "",
+      });
+      setSelectedType(editingExpense.type);
+    }
+  }, [editingExpense]);
+
   if (isLoading) return <LoadingSpinner />;
 
   return (
@@ -134,7 +178,7 @@ const ExpenseTracker = () => {
             Expense Tracker
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your income and expenses.
+            Manage your income, expenses, and loans.
           </p>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -155,7 +199,8 @@ const ExpenseTracker = () => {
                 <Input
                   id="description"
                   name="description"
-                  defaultValue={editingExpense?.description || ""}
+                  value={formData.description || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   required
                 />
               </div>
@@ -165,17 +210,19 @@ const ExpenseTracker = () => {
                   id="amount"
                   name="amount"
                   type="number"
-                  defaultValue={editingExpense?.amount || ""}
+                  step="0.01"
+                  value={formData.amount || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
                   required
                 />
               </div>
               <div>
                 <label htmlFor="type">Type</label>
                 <Select
-                  name="type"
-                  defaultValue={editingExpense?.type || "expense"}
+                  value={formData.type || "expense"}
+                  onValueChange={handleTypeChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -184,12 +231,37 @@ const ExpenseTracker = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* FIXED Loan Type Field */}
+              {(selectedType === "expense" || editingExpense?.type === "expense") && (
+                <div>
+                  <label htmlFor="loanType">Loan Type</label>
+                  <Select
+                    value={formData.loanType || undefined}
+                    onValueChange={handleLoanTypeChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select loan type (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="personal">Personal Loan</SelectItem>
+                      <SelectItem value="home">Home Loan</SelectItem>
+                      <SelectItem value="car">Car Loan</SelectItem>
+                      <SelectItem value="education">Education Loan</SelectItem>
+                      <SelectItem value="credit-card">Credit Card</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="category">Category</label>
                 <Input
                   id="category"
                   name="category"
-                  defaultValue={editingExpense?.category || ""}
+                  value={formData.category || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
                   required
                 />
               </div>
@@ -199,17 +271,14 @@ const ExpenseTracker = () => {
                   id="date"
                   name="date"
                   type="date"
-                  defaultValue={
-                    editingExpense?.date
-                      ? editingExpense.date.split("T")[0]
-                      : new Date().toISOString().split("T")[0]
-                  }
+                  value={formData.date || new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
                   required
                 />
               </div>
               <Button
                 type="submit"
-                disabled={createExpense.isLoading || updateExpense.isLoading}
+                disabled={createExpense.isPending || updateExpense.isPending}
               >
                 {editingExpense ? "Update Transaction" : "Add Transaction"}
               </Button>
@@ -218,6 +287,7 @@ const ExpenseTracker = () => {
         </Dialog>
       </div>
 
+      {/* Rest of your component remains exactly the same */}
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
@@ -264,6 +334,7 @@ const ExpenseTracker = () => {
           </CardContent>
         </Card>
       </div>
+
       <div className="space-y-4">
         {filteredExpenses.length === 0 ? (
           <p className="text-center text-gray-500">No transactions found.</p>
@@ -274,6 +345,7 @@ const ExpenseTracker = () => {
                 <TableRow>
                   <TableHead>Description</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Loan Type</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-center">Actions</TableHead>
@@ -287,17 +359,25 @@ const ExpenseTracker = () => {
                     </TableCell>
                     <TableCell>{expense.category}</TableCell>
                     <TableCell>
+                      {expense.loanType ? (
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                          {expense.loanType.replace("-", " ")}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
+                    <TableCell>
                       {new Date(expense.date).toLocaleDateString()}
                     </TableCell>
                     <TableCell
-                      className={`text-right font-semibold Rs{
+                      className={`text-right font-semibold ${
                         expense.type === "income"
                           ? "text-green-600 dark:text-green-400"
                           : "text-red-600 dark:text-red-400"
                       }`}
                     >
-                      {expense.type === "income" ? "+" : "-"}Rs 
-                     {' '} {expense.amount.toFixed(2)}
+                      {expense.type === "income" ? "+" : "-"}Rs {expense.amount.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center gap-2">

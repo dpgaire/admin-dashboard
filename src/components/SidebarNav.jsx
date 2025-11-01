@@ -20,6 +20,7 @@ import {
   Timer,
   Target,
   Library as LibraryIcon,
+  Database,
 } from "lucide-react";
 import { DollarSign } from "lucide-react";
 
@@ -77,6 +78,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
       title: "Development Tools",
       items: [
         { name: "Code Log", href: "/code-log", icon: Code },
+        { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
          { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
         { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
         { name: "JSON Formatter", href: "/json-formatter", icon: FileText },

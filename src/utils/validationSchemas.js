@@ -171,3 +171,10 @@ export const librarySchema = yup.object({
   author: yup.string().optional(),
   coverImage: yup.string().url("Must be a valid URL").optional(),
 });
+
+export const promptStorageSchema = yup.object({
+  title: yup.string().required("Title is required"),
+  ai_category: yup.string().required("AI Category is required"),
+  prompt: yup.string().required("Prompt is required"),
+});
+

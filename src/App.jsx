@@ -35,6 +35,7 @@ import GoalSetting from "./pages/GoalSetting";
 import ExpenseTracker from "./pages/ExpenseTracker";
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
+import PromptStorage from "./pages/PromptStorage";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -69,6 +70,7 @@ const AuthenticatedApp = () => {
                 <Route path="/chat-user" element={<ChatUser />} />
                 <Route path="/chat-history" element={<ChatHistory />} />
                 <Route path="/code-log" element={<CodeLog />} />
+                <Route path="/prompt-storage" element={<PromptStorage />} />
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/md-to-pdf" element={<MarkdownEditor />} />
                 <Route path="/rich-text-editor" element={<RichTextEditor />} />

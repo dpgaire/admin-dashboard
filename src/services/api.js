@@ -228,6 +228,15 @@ export const libraryAPI = {
 
 };
 
+// Prompt Storage API
+export const promptStorageAPI = {
+  getAll: () => api.get('/prompt-storage'),
+  getById: (id) => api.get(`/prompt-storage/${id}`),
+  create: (data) => api.post('/prompt-storage', data),
+  update: (id, data) => api.put(`/prompt-storage/${id}`, data),
+  delete: (id) => api.delete(`/prompt-storage/${id}`),
+};
+
 
 
 // Settings API

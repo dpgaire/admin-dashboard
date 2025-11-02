@@ -93,7 +93,9 @@ const ChatHistory = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle>{item.title}</CardTitle>
-                  <CardDescription>User ID: {item.userId}</CardDescription>
+                  <CardDescription>{item.fullName}</CardDescription>
+                  <CardDescription className="text-gray-400">{item.email}</CardDescription>
+
                 </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" onClick={() => handleDelete(item.userId, item.id)} disabled={deleteMutation.isLoading}>

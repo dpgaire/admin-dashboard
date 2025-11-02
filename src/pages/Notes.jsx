@@ -153,7 +153,7 @@ const Notes = () => {
     (note) =>
       note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoading) {
     return <LoadingSpinner />;

@@ -202,7 +202,7 @@ const Blogs = () => {
     (blog) =>
       blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.content?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoadingBlog) {
     return <LoadingSpinner />;

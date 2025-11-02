@@ -92,7 +92,7 @@ const ChatUser = () => {
     (user) =>
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoadingUsers) {
     return <LoadingSpinner />;

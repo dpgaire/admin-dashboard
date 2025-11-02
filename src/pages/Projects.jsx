@@ -222,7 +222,7 @@ const Projects = () => {
     (project) =>
       project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoadingProjects) {
     return <LoadingSpinner />;

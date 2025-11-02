@@ -50,10 +50,17 @@ const ChatHistory = () => {
     }
   };
 
-  const filteredChatHistories = chatHistories.filter(
-    (item) =>
-      item.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+ const filteredChatHistories = chatHistories
+  .filter((item) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      item.title?.toLowerCase().includes(search) ||
+      item.fullName?.toLowerCase().includes(search) ||
+      item.email?.toLowerCase().includes(search)
+    );
+  })
+  .reverse(); // Sorts latest first if your chatHistories are in chronological order
+
 
   if (isLoadingHistories) {
     return <LoadingSpinner />;

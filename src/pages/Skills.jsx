@@ -194,7 +194,7 @@ const Skills = () => {
 
   const filteredSkills = skillsData.filter((skill) =>
     skill.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoadingSkills) {
     return <LoadingSpinner />;

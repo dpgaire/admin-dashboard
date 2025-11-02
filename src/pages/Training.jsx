@@ -192,7 +192,7 @@ const Training = () => {
       item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   const handleCopy = async (text) => {
     try {

@@ -85,7 +85,7 @@ const Contacts = () => {
     (user) =>
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoading) {
     return <LoadingSpinner />;

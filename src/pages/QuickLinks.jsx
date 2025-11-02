@@ -128,7 +128,7 @@ const QuickLinks = () => {
 
   const filteredQuickLinks = quickLinks?.filter((link) =>
     link.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoading) {
     return <LoadingSpinner />;

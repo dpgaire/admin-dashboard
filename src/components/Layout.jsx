@@ -232,6 +232,9 @@ const Layout = ({ children }) => {
                     <DropdownMenuLabel>
                       {user?.fullName || "User"}
                     </DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-gray-400">
+                      {user?.role || "User"}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
                       <Settings className="mr-2 h-4 w-4" />

@@ -36,6 +36,7 @@ import ExpenseTracker from "./pages/ExpenseTracker";
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 import PromptStorage from "./pages/PromptStorage";
+import QRSystem from "./pages/QRSystem";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
                 <Route path="/expense-tracker" element={<ExpenseTracker />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/qr-system" element={<QRSystem />} />
 
                 <Route
                   path="/"

@@ -135,7 +135,7 @@ const GoalSetting = () => {
 
   const filteredObjectives = objectives.filter((obj) =>
     obj.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   const handleUpdateObjective = () => {
     if (editingObjective.title) {

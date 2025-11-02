@@ -141,7 +141,7 @@ const ExpenseTracker = () => {
       expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (expense.loanType &&
         expense.loanType.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ).reverse();
 
   const totalIncome = filteredExpenses
     .filter((exp) => exp.type === "income")

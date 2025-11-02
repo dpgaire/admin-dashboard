@@ -172,16 +172,21 @@ const Tasks = () => {
     updateTaskMutation.mutate({ id: task.id, data: updatedTask });
   };
 
-  const columns = tasksData.reduce(
-    (acc, task) => {
-      if (task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-        if (!acc[task.status]) acc[task.status] = [];
-        acc[task.status].push(task);
-      }
-      return acc;
-    },
-    { todo: [], "in-progress": [], completed: [] }
-  );
+const columns = tasksData.reduce(
+  (acc, task) => {
+    if (task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (!acc[task.status]) acc[task.status] = [];
+      acc[task.status].push(task);
+    }
+    return acc;
+  },
+  { todo: [], "in-progress": [], completed: [] }
+);
+
+// Reverse each column so the latest tasks are shown first
+Object.keys(columns).forEach((key) => {
+  columns[key] = columns[key].reverse();
+});
 
   if (isLoading) return <LoadingSpinner />;
 

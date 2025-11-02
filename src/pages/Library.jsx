@@ -124,7 +124,7 @@ const Library = () => {
     (item) =>
       item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoadingLibrary) {
     return <LoadingSpinner />;

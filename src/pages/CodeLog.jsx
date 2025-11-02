@@ -140,7 +140,7 @@ const CodeLog = () => {
 
   const filteredCodeLogs = codeLogs?.filter((code) =>
     code.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).reverse();
 
   if (isLoading) {
     return <LoadingSpinner />;

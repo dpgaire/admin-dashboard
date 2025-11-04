@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronUp } from "lucide-react";
 import { ChevronDown } from "lucide-react";
+import { QrCodeIcon } from "lucide-react";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -82,6 +83,9 @@ const Layout = ({ children }) => {
     { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
     { name: "JSON Formatter", href: "/json-formatter", icon: Code },
     { name: "Profile", href: "/profile", icon: User },
+    { name: "QR System", href: "/qr-system", icon: QrCodeIcon },
+
+  
     { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
   ];
 

@@ -345,7 +345,7 @@ const RichTextEditor = () => {
   );
 
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-950 p-4 overflow-auto' : 'min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 p-4 sm:p-6'} ${isDarkMode ? 'dark' : ''}`}>
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50 p-4 overflow-auto' : 'min-h-screen  p-4 sm:p-6'} `}>
       <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageUpload} className="hidden" />
 
       <div className="max-w-[1800px] mx-auto space-y-4">

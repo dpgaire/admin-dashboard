@@ -352,8 +352,8 @@ const Blogs = () => {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMutation.isLoading}>
-                    {createMutation.isLoading ? "Creating..." : "Create"}
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending ? "Creating..." : "Create"}
                   </Button>
                 </div>
               </form>
@@ -419,7 +419,7 @@ const Blogs = () => {
                           size="sm"
                           className="text-red-500"
                           onClick={() => handleDeleteBlog(blog.id)}
-                          disabled={deleteMutation.isLoading}
+                          disabled={deleteMutation.isPending}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -526,8 +526,8 @@ const Blogs = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateMutation.isLoading}>
-                {updateMutation.isLoading ? "Updating..." : "Update"}
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Updating..." : "Update"}
               </Button>
             </div>
           </form>

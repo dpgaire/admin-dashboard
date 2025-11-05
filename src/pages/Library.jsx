@@ -144,7 +144,7 @@ const Library = () => {
           register={register}
           handleSubmit={handleSubmit}
           errors={errors}
-          isLoading={createMutation.isLoading}
+          isLoading={createMutation.isPending}
         />
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add Book
@@ -218,8 +218,8 @@ const Library = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={updateMutation.isLoading}>
-                  {updateMutation.isLoading ? "Updating..." : "Update"}
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Updating..." : "Update"}
                 </Button>
               </div>
             </form>

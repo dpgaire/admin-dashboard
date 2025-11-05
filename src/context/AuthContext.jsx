@@ -41,11 +41,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(credentials);
       const { accessToken, refreshToken, ...userData } = response.data;
-      if (userData.role !== 'admin') {
-        toast.error('Access denied. Admin privileges required.');
-        return false;
-      }
-      
       localStorage.setItem('token', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -74,7 +69,7 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = () => {
     const token = localStorage.getItem('token');
-    return !!token && !!user && user.role === 'admin';
+    return !!token && !!user;
   };
 
   const value = {

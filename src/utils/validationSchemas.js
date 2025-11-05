@@ -14,21 +14,11 @@ export const loginSchema = yup.object({
 
 // User validation schema
 export const userSchema = yup.object({
-  fullName: yup
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .required("Full name is required"),
-  email: yup
-    .string()
-    .email("Invalid email format")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+  fullName: yup.string().required("Full name is required"),
+  email: yup.string().email("Invalid email address").required("Email is required"),
   role: yup
     .string()
-    .oneOf(["admin", "user"], "Role must be either admin or user")
+    .oneOf(["superAdmin", "Admin", "User"], "Invalid role")
     .required("Role is required"),
 });
 
@@ -58,24 +48,36 @@ export const aboutSchema = yup.object({
   tagline: yup.string().required("Tagline is required"),
   description: yup.string().required("Description is required"),
   philosophy: yup.string().required("Philosophy is required"),
-  tags: yup.array().of(yup.string().required("Tag is required")).min(1, "At least one tag is required"),
-  areasOfExpertise: yup.array().of(
-    yup.object({
-      title: yup.string().required("Area title is required"),
-      description: yup.string().required("Area description is required"),
-    })
-  ).min(1, "At least one area of expertise is required"),
-  stats: yup.array().of(
-    yup.object({
-      title: yup.string().required("Stat title is required"),
-      count: yup.string().required("Stat count is required"),
-    })
-  ).min(1, "At least one stat is required"),
+  tags: yup
+    .array()
+    .of(yup.string().required("Tag is required"))
+    .min(1, "At least one tag is required"),
+  areasOfExpertise: yup
+    .array()
+    .of(
+      yup.object({
+        title: yup.string().required("Area title is required"),
+        description: yup.string().required("Area description is required"),
+      })
+    )
+    .min(1, "At least one area of expertise is required"),
+  stats: yup
+    .array()
+    .of(
+      yup.object({
+        title: yup.string().required("Stat title is required"),
+        count: yup.string().required("Stat count is required"),
+      })
+    )
+    .min(1, "At least one stat is required"),
   contactDetails: yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
     phone: yup.string().required("Phone is required"),
     location: yup.string().required("Location is required"),
-    profileImage: yup.string().url("Invalid URL").required("Profile image URL is required"),
+    profileImage: yup
+      .string()
+      .url("Invalid URL")
+      .required("Profile image URL is required"),
     cv: yup.string().url("Invalid URL").required("Latest CV URL is required"),
   }),
 });
@@ -177,4 +179,3 @@ export const promptStorageSchema = yup.object({
   ai_category: yup.string().required("AI Category is required"),
   prompt: yup.string().required("Prompt is required"),
 });
-

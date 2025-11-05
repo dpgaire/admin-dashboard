@@ -30,6 +30,7 @@ import {
   DollarSign,
   Library as LibraryIcon,
 } from "lucide-react";
+import { Database } from "lucide-react";
 
 const CommandPalette = () => {
   const [open, setOpen] = useState(false);
@@ -77,6 +78,8 @@ const CommandPalette = () => {
     { name: "Profile", href: "/profile", icon: User },
     { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
     { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
+    { name: "QR System", href: "/qr-system", icon: FileText },
   ];
 
   return (

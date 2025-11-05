@@ -228,9 +228,9 @@ const GoalSetting = () => {
               />
               <Button
                 onClick={handleAddObjective}
-                disabled={createObjective.isLoading}
+                disabled={createObjective.isPending}
               >
-                {createObjective.isLoading ? "Adding..." : "Add Objective"}
+                {createObjective.isPending ? "Adding..." : "Add Objective"}
               </Button>
             </div>
           </DialogContent>
@@ -395,10 +395,10 @@ const GoalSetting = () => {
                   <div className="flex justify-end">
                     <Button
                       onClick={() => handleAddKeyResults(obj.id)}
-                      disabled={createKeyResults.isLoading}
+                      disabled={createKeyResults.isPending}
                       className="w-fit"
                     >
-                      {createKeyResults.isLoading
+                      {createKeyResults.isPending
                         ? "Adding..."
                         : "Add Key Results"}
                     </Button>
@@ -450,9 +450,9 @@ const GoalSetting = () => {
               />
               <Button
                 onClick={handleUpdateObjective}
-                disabled={updateObjective.isLoading}
+                disabled={updateObjective.isPending}
               >
-                {updateObjective.isLoading ? "Saving..." : "Save Changes"}
+                {updateObjective.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           )}
@@ -501,9 +501,9 @@ const GoalSetting = () => {
               />
               <Button
                 onClick={handleUpdateKeyResult}
-                disabled={updateKeyResult.isLoading}
+                disabled={updateKeyResult.isPending}
               >
-                {updateKeyResult.isLoading ? "Saving..." : "Save Changes"}
+                {updateKeyResult.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           )}

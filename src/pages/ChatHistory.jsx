@@ -105,7 +105,7 @@ const ChatHistory = () => {
 
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(item.userId, item.id)} disabled={deleteMutation.isLoading}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(item.userId, item.id)} disabled={deleteMutation.isPending}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

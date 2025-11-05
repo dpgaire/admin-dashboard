@@ -37,6 +37,7 @@ import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 import PromptStorage from "./pages/PromptStorage";
 import QRSystem from "./pages/QRSystem";
+import Users from "./pages/Users";
 
 // Component to handle authenticated routes
 const AuthenticatedApp = () => {
@@ -69,6 +70,7 @@ const AuthenticatedApp = () => {
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/quicklinks" element={<QuickLinks />} />
                 <Route path="/chat-user" element={<ChatUser />} />
+                <Route path="/users" element={<Users />} />
                 <Route path="/chat-history" element={<ChatHistory />} />
                 <Route path="/code-log" element={<CodeLog />} />
                 <Route path="/prompt-storage" element={<PromptStorage />} />

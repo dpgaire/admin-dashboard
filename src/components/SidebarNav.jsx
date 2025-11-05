@@ -32,6 +32,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
       items: [
         { name: "Dashboard", href: "/dashboard", icon: Home },
         { name: "Tasks", href: "/tasks", icon: Layers },
+        { name: "Users", href: "/users", icon: Users },
         { name: "Library", href: "/library", icon: LibraryIcon },
         { name: "Notes", href: "/notes", icon: FileText },
         { name: "Quick Links", href: "/quicklinks", icon: LinkIcon },

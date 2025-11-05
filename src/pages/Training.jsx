@@ -296,8 +296,8 @@ const Training = () => {
                   </Button>
                 </div>
 
-                <Button type="submit" disabled={createMutation.isLoading}>
-                  {createMutation.isLoading ? "Creating..." : "Create"}
+                <Button type="submit" disabled={createMutation.isPending}>
+                  {createMutation.isPending ? "Creating..." : "Create"}
                 </Button>
               </form>
             </DialogContent>
@@ -340,7 +340,7 @@ const Training = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(item.id)}
-                    disabled={deleteMutation.isLoading}
+                    disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -414,8 +414,8 @@ const Training = () => {
                 Add Tag
               </Button>
             </div>
-            <Button type="submit" disabled={updateMutation.isLoading}>
-              {updateMutation.isLoading ? "Updating..." : "Update"}
+            <Button type="submit" disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? "Updating..." : "Update"}
             </Button>
           </form>
         </DialogContent>

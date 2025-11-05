@@ -247,7 +247,7 @@ const Notes = () => {
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={createNote.isLoading || updateNote.isLoading}
+                    disabled={createNote.isPending || updateNote.isPending}
                   >
                     {editingNote ? "Update" : "Create"}
                   </Button>

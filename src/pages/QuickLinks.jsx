@@ -192,7 +192,7 @@ const QuickLinks = () => {
                   <Button
                     type="submit"
                     disabled={
-                      createQuickLink.isLoading || updateQuickLink.isLoading
+                      createQuickLink.isPending || updateQuickLink.isPending
                     }
                   >
                     {editingLink ? "Update" : "Create"}

@@ -218,7 +218,7 @@ const CodeLog = () => {
                 <DialogFooter>
                   <Button
                     type="submit"
-                    disabled={createLog.isLoading || updateLog.isLoading}
+                    disabled={createLog.isPending || updateLog.isPending}
                   >
                     {editingLog ? "Update" : "Create"}
                   </Button>

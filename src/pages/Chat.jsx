@@ -53,7 +53,7 @@ const Chat = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, mutation.isLoading]);
+  }, [messages, mutation.isPending]);
 
   return (
     <div className="flex flex-col h-[85vh] md:h-[90vh] max-w-4xl mx-auto p-4 sm:p-6">
@@ -119,7 +119,7 @@ const Chat = () => {
               ))}
             </AnimatePresence>
 
-            {mutation.isLoading && (
+            {mutation.isPending && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -150,10 +150,10 @@ const Chat = () => {
             <Button
               type="submit"
               size="icon"
-              disabled={mutation.isLoading}
+              disabled={mutation.isPending}
               className="rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:scale-105 transition-transform"
             >
-              {mutation.isLoading ? (
+              {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Send className="h-4 w-4" />

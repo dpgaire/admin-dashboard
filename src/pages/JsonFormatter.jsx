@@ -5,33 +5,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, Expand, Shrink, Eye, EyeOff } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
 import toast from "react-hot-toast";
+import { useTheme } from "@/context/ThemeContext";
+
 
 const JsonFormatter = () => {
-  const [inputJson, setInputJson] = useState('');
-  const [formattedJson, setFormattedJson] = useState('');
-  const [error, setError] = useState('');
+  const [inputJson, setInputJson] = useState("");
+  const [formattedJson, setFormattedJson] = useState("");
+  const [error, setError] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+    const { theme } = useTheme();
+
+  console.log("theme", theme);
 
   const handleFormat = () => {
     try {
       const parsed = JSON.parse(inputJson);
       const formatted = JSON.stringify(parsed, null, 2);
       setFormattedJson(formatted);
-      setError('');
+      setError("");
     } catch (e) {
-      setFormattedJson('');
-      setError('Invalid JSON: ' + e.message);
-      toast.error('Invalid JSON format!');
+      setFormattedJson("");
+      setError("Invalid JSON: " + e.message);
+      toast.error("Invalid JSON format!");
     }
   };
 
   const handleCopy = () => {
     if (formattedJson) {
       navigator.clipboard.writeText(formattedJson);
-      toast.success('Formatted JSON copied to clipboard!');
+      toast.success("Formatted JSON copied to clipboard!");
     } else {
-      toast.error('Nothing to copy!');
+      toast.error("Nothing to copy!");
     }
   };
 
@@ -45,7 +50,10 @@ const JsonFormatter = () => {
 
   return (
     <div
-      className={`space-y-6 ${isFullScreen ? 'fixed inset-0 bg-gray-900 z-50 p-6' : ''}`}>
+      className={`space-y-6 ${
+        isFullScreen ? "fixed inset-0 bg-gray-900 z-50 p-6" : ""
+      }`}
+    >
       <div className="flex flex-col md:flex-row items-start gap-2 md:gap-0 md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -61,16 +69,28 @@ const JsonFormatter = () => {
             <Copy className="mr-2 h-4 w-4" /> Copy
           </Button>
           <Button onClick={togglePreview} variant="outline">
-            {showPreview ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-            {showPreview ? 'Hide Preview' : 'Show Preview'}
+            {showPreview ? (
+              <EyeOff className="mr-2 h-4 w-4" />
+            ) : (
+              <Eye className="mr-2 h-4 w-4" />
+            )}
+            {showPreview ? "Hide Preview" : "Show Preview"}
           </Button>
           <Button onClick={toggleFullScreen} variant="outline">
-            {isFullScreen ? <Shrink className="mr-2 h-4 w-4" /> : <Expand className="mr-2 h-4 w-4" />}
-            {isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            {isFullScreen ? (
+              <Shrink className="mr-2 h-4 w-4" />
+            ) : (
+              <Expand className="mr-2 h-4 w-4" />
+            )}
+            {isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
           </Button>
         </div>
       </div>
-      <div className={`grid ${showPreview ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
+      <div
+        className={`grid ${
+          showPreview ? "md:grid-cols-2" : "md:grid-cols-1"
+        } gap-6`}
+      >
         <Card>
           <CardHeader>
             <CardTitle>Input JSON</CardTitle>
@@ -79,8 +99,8 @@ const JsonFormatter = () => {
             <Textarea
               value={inputJson}
               onChange={(e) => setInputJson(e.target.value)}
-              placeholder='Paste your JSON here...'
-              className='h-[550px] text-base font-mono'
+              placeholder="Paste your JSON here..."
+              className="h-[550px] text-base font-mono"
             />
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </CardContent>
@@ -91,21 +111,36 @@ const JsonFormatter = () => {
               <CardTitle>Formatted JSON</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className='h-[550px] rounded-md bg-gray-800 overflow-auto'>
-                <Highlight theme={themes.vsDark} code={formattedJson} language="json">
-                  {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <pre className={className} style={style}>
-                      {tokens.map((line, i) => (
-                        <div {...getLineProps({ line, key: i })}>
-                          {line.map((token, key) => (
-                            <span {...getTokenProps({ token, key })} />
-                          ))}
-                        </div>
-                      ))}
-                    </pre>
-                  )}
-                </Highlight>
-              </div>
+              {formattedJson && theme && formattedJson.trim() !== "" ? (
+                <div className="h-[550px] rounded-md overflow-auto">
+                  <Highlight
+                    key={theme}
+                    theme={theme === "dark" ? themes.vsDark : themes.github}
+                    code={formattedJson}
+                    language="json"
+                  >
+                    {({
+                      className,
+                      style,
+                      tokens,
+                      getLineProps,
+                      getTokenProps,
+                    }) => (
+                      <pre className={className} style={style}>
+                        {tokens.map((line, i) => (
+                          <div key={i} {...getLineProps({ line })}>
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token })} />
+                            ))}
+                          </div>
+                        ))}
+                      </pre>
+                    )}
+                  </Highlight>
+                </div>
+              ) : (
+                <p>Input value not set.....</p>
+              )}
             </CardContent>
           </Card>
         )}

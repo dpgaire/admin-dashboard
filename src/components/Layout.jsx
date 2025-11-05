@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -34,7 +34,6 @@ import { useAuth } from "../context/AuthContext";
 import SidebarNav from "./SidebarNav";
 import CommandPalette from "./CommandPalette";
 
-// ✅ Dropdown imports (from shadcn/ui or Radix UI)
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -46,16 +45,13 @@ import {
 import { ChevronUp } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { QrCodeIcon } from "lucide-react";
+import { Database } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const [darkMode, setDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem("darkMode");
-    return savedMode === "true";
-  });
-
+  const {theme,toggleTheme} = useTheme()
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -77,6 +73,7 @@ const Layout = ({ children }) => {
     { name: "Contact", href: "/contact", icon: Phone },
     { name: "Chat", href: "/chat", icon: MessageCircle },
     { name: "Chat Users", href: "/chat-user", icon: Users },
+    { name: "Users", href: "/users", icon: Users },
     { name: "Chat History", href: "/chat-history", icon: History },
     { name: "Code Log", href: "/code-log", icon: Code },
     { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
@@ -84,27 +81,19 @@ const Layout = ({ children }) => {
     { name: "JSON Formatter", href: "/json-formatter", icon: Code },
     { name: "Profile", href: "/profile", icon: User },
     { name: "QR System", href: "/qr-system", icon: QrCodeIcon },
-
-  
     { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
+    { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
   ];
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
-
-  useEffect(() => {
-    localStorage.setItem("darkMode", darkMode);
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
-
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
-
+  
   const isCurrentPath = (path) => location.pathname === path;
 
   return (
-    <div className={`min-h-screen ${darkMode ? "dark" : ""}`}>
+    <div className={`min-h-screen`}>
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
         {/* Sidebar */}
         <div
@@ -201,10 +190,10 @@ const Layout = ({ children }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={toggleDarkMode}
+                  onClick={toggleTheme}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  {darkMode ? (
+                  {theme === 'dark'? (
                     <Sun className="h-5 w-5" />
                   ) : (
                     <Moon className="h-5 w-5" />
@@ -240,11 +229,17 @@ const Layout = ({ children }) => {
                       {user?.role || "User"}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => navigate("/settings")}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>

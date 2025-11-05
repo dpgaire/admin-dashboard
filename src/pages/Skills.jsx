@@ -313,16 +313,16 @@ const Skills = () => {
               <div className="flex items-center space-x-2 pt-4">
                 <Button
                   type="submit"
-                  disabled={createMutation.isLoading}
+                  disabled={createMutation.isPending}
                   className="flex-1"
                 >
-                  {createMutation.isLoading ? "Creating..." : "Create Skill"}
+                  {createMutation.isPending ? "Creating..." : "Create Skill"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
-                  disabled={createMutation.isLoading}
+                  disabled={createMutation.isPending}
                 >
                   Cancel
                 </Button>
@@ -386,7 +386,7 @@ const Skills = () => {
                       size="sm"
                       onClick={() => handleDeleteSkill(skill.id)}
                       className="text-red-600 hover:text-red-700"
-                      disabled={deleteMutation.isLoading}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -477,16 +477,16 @@ const Skills = () => {
             <div className="flex items-center space-x-2 pt-4">
               <Button
                 type="submit"
-                disabled={updateMutation.isLoading}
+                disabled={updateMutation.isPending}
                 className="flex-1"
               >
-                {updateMutation.isLoading ? "Updating..." : "Update Skill"}
+                {updateMutation.isPending ? "Updating..." : "Update Skill"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsEditModalOpen(false)}
-                disabled={updateMutation.isLoading}
+                disabled={updateMutation.isPending}
               >
                 Cancel
               </Button>

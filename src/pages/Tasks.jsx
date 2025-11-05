@@ -270,8 +270,8 @@ Object.keys(columns).forEach((key) => {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createTaskMutation.isLoading}>
-                    {createTaskMutation.isLoading ? "Creating..." : "Create"}
+                  <Button type="submit" disabled={createTaskMutation.isPending}>
+                    {createTaskMutation.isPending ? "Creating..." : "Create"}
                   </Button>
                 </div>
               </form>

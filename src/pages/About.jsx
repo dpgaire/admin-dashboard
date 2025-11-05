@@ -514,7 +514,6 @@ const About = () => {
           >
             {createMutation.isPending || updateMutation.isPending ? (
               <>
-                <LoadingSpinner className="h-4 w-4 mr-2" />
                 Saving...
               </>
             ) : (

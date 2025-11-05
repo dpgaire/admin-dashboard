@@ -40,14 +40,12 @@ const PromptStorage = () => {
     },
   });
 
-  // Mock data fallback (replace with real data when API works)
- 
+  console.log('prompts',prompts)
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(promptStorageSchema),
@@ -143,7 +141,7 @@ const PromptStorage = () => {
     reader.readAsText(file);
   };
 
-  const filteredPrompts = prompts.filter((prompt) =>
+  const filteredPrompts = prompts?.filter((prompt) =>
     prompt.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     prompt.ai_category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -274,7 +272,6 @@ const PromptStorage = () => {
                     >
                       {createPrompt.isPending || updatePrompt.isPending ? (
                         <>
-                          <LoadingSpinner className="mr-2 h-4 w-4" />
                           Saving...
                         </>
                       ) : (
@@ -324,7 +321,7 @@ const PromptStorage = () => {
                 className="group relative overflow-hidden transition-all duration-200 hover:shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               >
                 {/* Header */}
-                <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <CardHeader className="pb-3 pt-4 px-4   border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-base font-semibold text-gray-900 dark:text-white truncate">

@@ -58,6 +58,7 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
+  register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   refreshToken: () => api.post('/auth/refresh-token'),
 };
@@ -78,6 +79,7 @@ export const usersAPI = {
       return api.put(`/users/${id}`, data);
     }
   },
+  updateProfile: (id, data) => api.put(`/users/profile/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
 };
 

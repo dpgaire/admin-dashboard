@@ -1,6 +1,5 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI } from "@/services/api";
 import toast from "react-hot-toast";
@@ -24,6 +23,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { userSchema } from "@/utils/validationSchemas";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 
 const AddUserModal = ({ isOpen, onClose }) => {
@@ -37,7 +37,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: zodResolver(userSchema),
+    resolver: yupResolver(userSchema),
     defaultValues: { role: "User" },
   });
 

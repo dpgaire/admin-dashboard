@@ -52,7 +52,7 @@ import { UserCircle } from "lucide-react";
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const {theme,toggleTheme} = useTheme()
+  const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -88,9 +88,9 @@ const Layout = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
-  
+
   const isCurrentPath = (path) => location.pathname === path;
 
   return (
@@ -194,7 +194,7 @@ const Layout = ({ children }) => {
                   onClick={toggleTheme}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  {theme === 'dark'? (
+                  {theme === "dark" ? (
                     <Sun className="h-5 w-5" />
                   ) : (
                     <Moon className="h-5 w-5" />
@@ -223,24 +223,27 @@ const Layout = ({ children }) => {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent className="w-48" align="end">
-                    <DropdownMenuLabel onClick={() => navigate("/profile")} className="flex cursor-pointer items-center gap-3 px-3 py-2">
-  <img
-    src={user?.image || "/default-avatar.png"}
-    alt="avatar"
-    className="w-8 h-8 rounded-full object-cover"
-  />
-  <div>
-    <div className="font-medium text-sm ">
-      {user?.fullName || "User"}
-    </div>
-    <div className="text-xs text-muted-foreground">
-      {user?.role || "User"}
-    </div>
-  </div>
-</DropdownMenuLabel>
+                    <DropdownMenuLabel
+                      onClick={() => navigate("/profile")}
+                      className="flex cursor-pointer items-center gap-3 px-3 py-2"
+                    >
+                      <img
+                        src={user?.image || "/default-avatar.png"}
+                        alt="avatar"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div>
+                        <div className="font-medium text-sm ">
+                          {user?.fullName || "User"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {user?.role || "User"}
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
 
                     <DropdownMenuSeparator />
-                     <DropdownMenuItem
+                    <DropdownMenuItem
                       className="cursor-pointer"
                       onClick={() => navigate("/profile")}
                     >

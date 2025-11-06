@@ -27,6 +27,7 @@ import Settings from "./Settings";
 import PromptStorage from "./PromptStorage";
 import QRSystem from "./QRSystem";
 import Users from "./Users";
+import Landing from "./Landing";
 
 export {
   Login,
@@ -58,4 +59,5 @@ export {
   PromptStorage,
   QRSystem,
   Users,
+  Landing,
 };

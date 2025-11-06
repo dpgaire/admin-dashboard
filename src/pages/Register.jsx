@@ -17,6 +17,7 @@ import { registerSchema } from "../utils/validationSchemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { authAPI } from "@/services/api";
+import { ArrowLeft } from "lucide-react";
 
 const Register = () => {
   const queryClient = useQueryClient();
@@ -58,6 +59,17 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="w-full max-w-md mx-auto space-y-6">
+
+       <div className="flex items-center">
+                <Link
+                  to="/"
+                  className="flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Home
+                </Link>
+              </div>
       <Card className="w-full max-w-md shadow-xl transition-all duration-300 hover:shadow-2xl">
         <CardHeader className="space-y-2 text-center pb-6">
           <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-50">
@@ -205,23 +217,7 @@ const Register = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Optional: Add subtle CSS for fade-in */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-4px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.2s ease-out;
-        }
-      `}</style>
+      </div>
     </div>
   );
 };

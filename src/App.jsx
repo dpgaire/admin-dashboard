@@ -41,6 +41,7 @@ import {
   PromptStorage,
   QRSystem,
   Users,
+  Landing,
 } from "./pages";
 import { ProtectedRoutes } from "./components/ProtectedRoutes";
 
@@ -50,6 +51,7 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route

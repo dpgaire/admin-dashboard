@@ -1,7 +1,20 @@
 import * as yup from "yup";
 
 // Login validation schema
+
 export const loginSchema = yup.object({
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+});
+
+export const registerSchema = yup.object({
+  fullName: yup.string().required("Full name is required"),
   email: yup
     .string()
     .email("Invalid email format")
@@ -14,12 +27,19 @@ export const loginSchema = yup.object({
 
 // User validation schema
 export const userSchema = yup.object({
-  fullName: yup.string().required("Full name is required"),
-  email: yup.string().email("Invalid email address").required("Email is required"),
+  fullName: yup.string().min(3, "Full name must be at least 3 characters"),
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email is required"),
   role: yup
     .string()
     .oneOf(["superAdmin", "Admin", "User"], "Invalid role")
     .required("Role is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
 });
 
 // User update validation schema (password optional)
@@ -27,19 +47,8 @@ export const userUpdateSchema = yup.object({
   fullName: yup
     .string()
     .min(2, "Full name must be at least 2 characters")
-    .required("Full name is required"),
-  email: yup
-    .string()
-    .email("Invalid email format")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
     .optional(),
-  role: yup
-    .string()
-    .oneOf(["admin", "user"], "Role must be either admin or user")
-    .required("Role is required"),
+  email: yup.string().email("Invalid email format").optional(),
 });
 
 //About Validations

@@ -79,10 +79,10 @@ const ChatUser = () => {
 
   const filteredUsers = useMemo(() => {
     return usersData
-      .filter(
+      ?.filter(
         (user) =>
-          user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+          user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .reverse();
   }, [usersData, searchTerm]);

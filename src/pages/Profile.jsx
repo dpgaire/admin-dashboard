@@ -1,114 +1,203 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { User, Mail, Shield, Save, Lock, Eye, EyeOff, Camera } from "lucide-react";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import {
+  User,
+  Mail,
+  Shield,
+  Save,
+  Lock,
+  Eye,
+  EyeOff,
+  Link,
+  Copy,
+  RefreshCw,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { useAuth } from "../context/AuthContext";
 import { userUpdateSchema } from "../utils/validationSchemas";
 import { usersAPI } from "../services/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import toast from "react-hot-toast";
 
 const Profile = () => {
-  const { user, setUser } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { user: authUser, setUser } = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(user?.image || null);
-  const fileInputRef = useRef(null);
+
+  const {
+    data: user = authUser,
+    isLoading: isLoadingUser,
+  } = useQuery({
+    queryKey: ["user", authUser?.id],
+    queryFn: async () => {
+      const res = await usersAPI.getById(authUser.id);
+      return res.data;
+    },
+    enabled: !!authUser?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const updateMutation = useMutation({
+  mutationFn: (payload) => usersAPI.updateProfile(user.id, payload),
+  onMutate: async (payload) => {
+    await queryClient.cancelQueries({ queryKey: ["user", user.id] });
+
+    const previous = queryClient.getQueryData(["user", user.id]);
+
+    queryClient.setQueryData(["user", user.id], old => ({
+      ...old,
+      ...payload,
+      image: payload.image || old.image,
+    }));
+
+    return { previous };
+  },
+  onError: (err, payload, context) => {
+    queryClient.setQueryData(["user", user.id], context?.previous);
+    toast.error("Update failed");
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+  },
+});
+
+ const regenMutation = useMutation({
+  mutationFn: (data) => usersAPI.updateProfile(user.id,data),
+  onMutate: async () => {
+    await queryClient.cancelQueries({ queryKey: ["user", user.id] });
+
+    const previous = queryClient.getQueryData(["user", user.id]);
+
+    // Optimistically update
+    const optimistic = {
+      ...previous,
+      apiKey: "Regenerating...", // placeholder to show immediate change
+    };
+
+    queryClient.setQueryData(["user", user.id], optimistic);
+
+    return { previous };
+  },
+  onError: (err, _variables, context) => {
+    if (context?.previous) {
+      queryClient.setQueryData(["user", user.id], context.previous);
+    }
+    toast.error(err.response?.data?.message ?? "Failed to regenerate API key");
+  },
+  onSuccess: (res) => {
+    const updated = { ...user, apiKey: res.apiKey };
+
+    queryClient.setQueryData(["user", user.id], updated);
+    setUser(updated);
+
+    toast.success("API key regenerated!");
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+  },
+});
+
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: yupResolver(userUpdateSchema),
     defaultValues: {
-      fullName: user?.fullName || "",
-      email: user?.email || "",
-      role: user?.role || "admin",
+      fullName: user?.fullName ?? "",
+      email: user?.email ?? "",
+      role: user?.role ?? "User",
+      image: user?.image ?? "",
     },
   });
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      
-      // Create a preview URL for the image
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+useEffect(() => {
+    if (user) {
+      reset({
+        fullName: user.fullName ?? "",
+        email: user.email ?? "",
+        role: user.role ?? "admin",
+        image: user.image ?? "",
+      });
     }
+  }, [user, reset]);
+
+  const onSubmit = (data) => {
+    const payload = {
+      fullName: data.fullName,
+      email: data.email,
+      role: data.role,
+      image: data.image || null,
+    };
+    updateMutation.mutate(payload);
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
+  const regenSubmit = (data) => {
+      const payload = {
+      fullName: data.fullName,
+      email: data.email,
+      regeregenerateApiKey:true,
+      role: data.role,
+      image: data.image || null,
+    };
+    regenMutation.mutate(payload);
   };
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      // Create FormData to handle file upload
-      const formData = new FormData();
-      
-      // Append text fields
-      formData.append("fullName", data.fullName);
-      formData.append("email", data.email);
-      formData.append("role", data.role);
-      
-      // Append password if provided
-      if (data.password) {
-        formData.append("password", data.password);
-      }
-      
-      // Append image if selected
-      if (selectedImage) {
-        formData.append("image", selectedImage);
-      }
-
-      // Update user with FormData
-      const updatedUser = await usersAPI.update(user.id, formData);
-
-      // Update local storage with new user data
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      setSelectedImage(null); // Reset selected image after upload
-      setImagePreview(updatedUser.image); // Update image preview with new URL
-      toast.success("Profile updated successfully!");
-      setIsEditing(false);
-    } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to update profile";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleCancel = () => {
     reset({
-      fullName: user?.fullName || "",
-      email: user?.email || "",
-      role: user?.role || "admin",
+      fullName: user?.fullName ?? "",
+      email: user?.email ?? "",
+      role: user?.role ?? "admin",
+      image: user?.image ?? "",
     });
-    setSelectedImage(null);
-    setImagePreview(user?.image || null);
     setIsEditing(false);
   };
+
+  const maskApiKey = (key) => {
+    if (!key) return "N/A";
+    if (key.length <= 8) return "****";
+    return `${key.slice(0, 4)}...${key.slice(-4)}`;
+  };
+
+  const copyApiKey = async () => {
+    if (!user?.apiKey) {
+      toast.error("No API key available");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(user.apiKey);
+      toast.success("API key copied!");
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
+  if (isLoadingUser) return <LoadingSpinner />;
 
   return (
     <div className="space-y-6">
@@ -122,60 +211,41 @@ const Profile = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
         <Card className="lg:col-span-1">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4 relative">
-              {imagePreview ? (
+            <div className="flex justify-center mb-4">
+              {user?.image ? (
                 <img
-                  src={imagePreview}
-                  alt={user.fullName}
+                  src={user?.image}
+                  alt={user?.fullName}
                   className="w-24 h-24 rounded-full object-cover"
                 />
               ) : (
                 <Avatar className="h-24 w-24">
                   <AvatarFallback className="bg-blue-500 text-white text-2xl">
-                    {user?.fullName?.charAt(0)?.toUpperCase() || "A"}
+                    {user?.fullName?.charAt(0)?.toUpperCase() ?? "A"}
                   </AvatarFallback>
                 </Avatar>
               )}
-              {isEditing && (
-                <button
-                  type="button"
-                  onClick={triggerFileInput}
-                 className="cursor-pointer absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white  p-2 rounded-full hover:border hover:border-blue-500  transition-colors"
-
-                >
-                  <Camera className="h-4 w-4 text-blue-500 hover:scale-110" />
-                </button>
-              )}
             </div>
-            <CardTitle className="text-xl">
-              {user?.fullName || "Admin User"}
-            </CardTitle>
-            <CardDescription>
-              {user?.email || "admin@example.com"}
-            </CardDescription>
+            <CardTitle className="text-xl">{user?.fullName}</CardTitle>
+            <CardDescription>{user?.email}</CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <Shield className="h-5 w-5 text-blue-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Role
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                    {user?.role || "Administrator"}
-                  </p>
+                  <p className="text-sm font-medium">Role</p>
+                  <p className="text-sm capitalize">{user?.role}</p>
                 </div>
               </div>
+
               <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <User className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Status
-                  </p>
+                  <p className="text-sm font-medium">Status</p>
                   <p className="text-sm text-green-600">Active</p>
                 </div>
               </div>
@@ -183,158 +253,223 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Profile Form */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>
-                  Update your account details and preferences
-                </CardDescription>
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Account Information</CardTitle>
+                  <CardDescription>
+                    Update your account details and preferences
+                  </CardDescription>
+                </div>
+                {!isEditing && (
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    variant="outline"
+                  >
+                    Edit Profile
+                  </Button>
+                )}
               </div>
-              {!isEditing && (
-                <Button onClick={() => setIsEditing(true)} variant="outline">
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Hidden file input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                accept="image/*"
-                className="hidden"
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      className="pl-10"
-                      disabled={!isEditing}
-                      {...register("fullName")}
-                    />
+            </CardHeader>
+
+            <CardContent>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="Enter your full name"
+                        className="pl-10"
+                        disabled={!isEditing}
+                        {...register("fullName")}
+                      />
+                    </div>
+                    {errors.fullName && (
+                      <p className="text-sm text-red-600">
+                        {errors.fullName.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.fullName && (
-                    <p className="text-sm text-red-600">
-                      {errors.fullName.message}
-                    </p>
-                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        className="pl-10"
+                        disabled={!isEditing}
+                        {...register("email")}
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-sm text-red-600">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      className="pl-10"
-                      autoComplete="off"
-                      disabled={!isEditing}
-                      {...register("email")}
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-sm text-red-600">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+                {/* ---- Image URL & Password (only when editing) ---- */}
+                {isEditing && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Image URL</Label>
+                      <div className="relative">
+                        <Link className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="image"
+                          type="url"
+                          placeholder="https://example.com/avatar.jpg"
+                          className="pl-10"
+                          {...register("image")}
+                          onChange={(e) => {
+                            setValue("image", e.target.value);
+                          }}
+                        />
+                      </div>
+                      {errors.image && (
+                        <p className="text-sm text-red-600">
+                          {errors.image.message}
+                        </p>
+                      )}
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="role"
-                    type="text"
-                    value="Administrator"
-                    className="pl-10 bg-gray-50 dark:bg-gray-800"
-                    disabled
-                  />
+                    <div className="space-y-2">
+                      <Label htmlFor="password">New Password (Optional)</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Leave blank to keep current"
+                          className="pl-10 pr-10"
+                          autoComplete="new-password"
+                          {...register("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-red-600">
+                          {errors.password.message}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Leave blank if you don't want to change your password
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ---- Submit / Cancel ---- */}
+                {isEditing && (
+                  <div className="flex items-center space-x-4 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={updateMutation.isPending}
+                      className="flex items-center space-x-2"
+                    >
+                      {updateMutation.isPending ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
+                      <span>
+                        {updateMutation.isPending ? "Saving…" : "Save Changes"}
+                      </span>
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={updateMutation.isPending}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>API Key</CardTitle>
+              <CardDescription>
+                Manage your API key for programmatic access
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Shield className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <p className="text-sm font-medium">Your API Key</p>
+                      <p className="text-sm font-mono">
+                        {maskApiKey(user?.apiKey)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={copyApiKey}
+                      className="flex items-center space-x-1"
+                    >
+                      <Copy className="h-4 w-4" />
+                      <span>Copy</span>
+                    </Button>
+
+                    {isEditing && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => regenSubmit(user)}
+                        disabled={regenMutation.isPending}
+                        className="flex items-center space-x-1"
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 ${
+                            regenMutation.isPending ? "animate-spin" : ""
+                          }`}
+                        />
+                        <span>Regenerate</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Role cannot be changed from the profile page
+                  <strong>Warning:</strong> Regenerating your API key will
+                  invalidate the current one. Update any applications using it
+                  immediately.
                 </p>
               </div>
-
-              {isEditing && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">New Password (Optional)</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Leave blank to keep current password"
-                      className="pl-10 pr-10"
-                      autoComplete="new-password"
-                      {...register("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {errors.password && (
-                    <p className="text-sm text-red-600">
-                      {errors.password.message}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Leave blank if you don't want to change your password
-                  </p>
-                </div>
-              )}
-
-              {isEditing && (
-                <div className="flex items-center space-x-4 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="flex items-center space-x-2"
-                  >
-                    {isLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <Save className="h-4 w-4" />
-                    )}
-                    <span>{isLoading ? "Saving..." : "Save Changes"}</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

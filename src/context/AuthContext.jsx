@@ -67,18 +67,13 @@ export const AuthProvider = ({ children }) => {
     toast.success('Logged out successfully');
   };
 
-  const isAuthenticated = () => {
-    const token = localStorage.getItem('token');
-    return !!token && !!user;
-  };
-
   const value = {
     user,
     token,
     login,
     logout,
     setUser,
-    isAuthenticated,
+    isAuthenticated: !!token && !!user,
     loading,
   };
 

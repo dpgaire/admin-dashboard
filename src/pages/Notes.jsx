@@ -262,7 +262,7 @@ const Notes = () => {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search projects..."
+              placeholder="Search notes..."
               className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -273,7 +273,7 @@ const Notes = () => {
       {/* Notes Grid */}
       {filteredNotes.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">No projects found.</p>
+          <p className="text-gray-500">No notes found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">

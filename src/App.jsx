@@ -6,114 +6,112 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
+import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
-import About from "./pages/About";
-import Projects from "./pages/Projects";
-import Contacts from "./pages/Contacts";
-import Queries from "./pages/Queries";
-import Training from "./pages/Training";
-import Blogs from "./pages/Blogs";
-import Chat from "./pages/Chat";
-import Skills from "./pages/Skills";
-import Notes from "./pages/Notes";
-import QuickLinks from "./pages/QuickLinks";
-import ChatUser from "./pages/ChatUser";
-import ChatHistory from "./pages/ChatHistory";
-import CodeLog from "./pages/CodeLog";
-import Tasks from "./pages/Tasks";
-import MarkdownEditor from "./pages/MarkdownEditor";
-import RichTextEditor from "./pages/RichTextEditor";
-import JsonFormatter from "./pages/JsonFormatter";
-import PomodoroTimer from "./pages/PomodoroTimer";
-import GoalSetting from "./pages/GoalSetting";
-import ExpenseTracker from "./pages/ExpenseTracker";
-import Library from "./pages/Library";
-import Settings from "./pages/Settings";
-import PromptStorage from "./pages/PromptStorage";
-import QRSystem from "./pages/QRSystem";
-import Users from "./pages/Users";
 
-// Component to handle authenticated routes
-const AuthenticatedApp = () => {
-  const { isAuthenticated } = useAuth();
+import Layout from "./components/Layout";
 
-  return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />
-        }
-      />
-      <Route
-        path="/*"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/contact" element={<Contacts />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/queries" element={<Queries />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/blogs" element={<Blogs />} />
-                <Route path="/training" element={<Training />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/skills" element={<Skills />} />
-                <Route path="/notes" element={<Notes />} />
-                <Route path="/quicklinks" element={<QuickLinks />} />
-                <Route path="/chat-user" element={<ChatUser />} />
-                <Route path="/users" element={<Users />} />
-                <Route path="/chat-history" element={<ChatHistory />} />
-                <Route path="/code-log" element={<CodeLog />} />
-                <Route path="/prompt-storage" element={<PromptStorage />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/md-to-pdf" element={<MarkdownEditor />} />
-                <Route path="/rich-text-editor" element={<RichTextEditor />} />
-                <Route path="/json-formatter" element={<JsonFormatter />} />
-                <Route path="/pomodoro-timer" element={<PomodoroTimer />} />
-                <Route path="/goal-setting" element={<GoalSetting />} />
-                <Route path="/expense-tracker" element={<ExpenseTracker />} />
-                <Route path="/library" element={<Library />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/qr-system" element={<QRSystem />} />
-
-                <Route
-                  path="/"
-                  element={
-                    isAuthenticated() ? (
-                      <Navigate to="/dashboard" replace />
-                    ) : (
-                      <Navigate to="/login" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="*"
-                  element={<Navigate to="/dashboard" replace />}
-                />
-              </Routes>
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
-  );
-};
+import {
+  Login,
+  Register,
+  Dashboard,
+  Profile,
+  About,
+  Projects,
+  Contacts,
+  Queries,
+  Training,
+  Blogs,
+  Chat,
+  Skills,
+  Notes,
+  QuickLinks,
+  ChatUser,
+  ChatHistory,
+  CodeLog,
+  Tasks,
+  MarkdownEditor,
+  RichTextEditor,
+  JsonFormatter,
+  PomodoroTimer,
+  GoalSetting,
+  ExpenseTracker,
+  Library,
+  Settings,
+  PromptStorage,
+  QRSystem,
+  Users,
+} from "./pages";
+import { ProtectedRoutes } from "./components/ProtectedRoutes";
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoutes>
+                  <Layout>
+                    <Routes>
+                      {/* Dashboard & Core */}
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contacts />} />
+                      <Route path="/queries" element={<Queries />} />
+                      <Route path="/projects" element={<Projects />} />
+                      <Route path="/blogs" element={<Blogs />} />
+                      <Route path="/training" element={<Training />} />
+                      <Route path="/skills" element={<Skills />} />
+                      <Route path="/notes" element={<Notes />} />
+                      <Route path="/quicklinks" element={<QuickLinks />} />
+                      <Route path="/tasks" element={<Tasks />} />
+                      <Route path="/library" element={<Library />} />
+                      <Route path="/settings" element={<Settings />} />
+
+                      {/* Chat */}
+                      <Route path="/chat" element={<Chat />} />
+                      <Route path="/chat-user" element={<ChatUser />} />
+                      <Route path="/chat-history" element={<ChatHistory />} />
+
+                      {/* Productivity */}
+                      <Route path="/pomodoro-timer" element={<PomodoroTimer />} />
+                      <Route path="/goal-setting" element={<GoalSetting />} />
+                      <Route path="/expense-tracker" element={<ExpenseTracker />} />
+
+                      {/* Dev Tools */}
+                      <Route path="/code-log" element={<CodeLog />} />
+                      <Route path="/prompt-storage" element={<PromptStorage />} />
+                      <Route path="/md-to-pdf" element={<MarkdownEditor />} />
+                      <Route path="/rich-text-editor" element={<RichTextEditor />} />
+                      <Route path="/json-formatter" element={<JsonFormatter />} />
+                      <Route path="/qr-system" element={<QRSystem />} />
+
+                      {/* Admin Only */}
+                      <Route path="/users" element={<Users />} />
+
+                      {/* Root Redirect */}
+                      <Route
+                        path="/"
+                        element={<Navigate to="/dashboard" replace />}
+                      />
+
+                      {/* 404 → Dashboard */}
+                      <Route
+                        path="*"
+                        element={<Navigate to="/dashboard" replace />}
+                      />
+                    </Routes>
+                  </Layout>
+                </ProtectedRoutes>
+              }
+            />
+          </Routes>
           <Toaster
             position="top-right"
             toastOptions={{
@@ -122,18 +120,8 @@ function App() {
                 background: "#363636",
                 color: "#fff",
               },
-              success: {
-                duration: 3000,
-                theme: {
-                  primary: "#4aed88",
-                },
-              },
-              error: {
-                duration: 4000,
-                theme: {
-                  primary: "#ff4b4b",
-                },
-              },
+              success: { duration: 3000 },
+              error: { duration: 4000 },
             }}
           />
         </div>

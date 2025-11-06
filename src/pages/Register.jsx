@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,39 +13,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuth } from "../context/AuthContext";
-import { loginSchema } from "../utils/validationSchemas";
+import { registerSchema } from "../utils/validationSchemas";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { authAPI } from "@/services/api";
 
-const Login = () => {
+const Register = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || "/dashboard";
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(registerSchema),
     mode: "onTouched",
   });
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      const success = await login(data);
-      if (success) {
-        navigate(from, { replace: true });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
+  const mutation = useMutation({
+    mutationFn: authAPI.register,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Account created successfully!");
+      navigate("/login");
+    },
+    onError: (error) => {
+      const message =
+        error?.response?.data?.message ||
+        "Failed to register. Please try again.";
+      toast.error(message);
+    },
+    onSettled: () => {
       setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (data) => {
+    setIsLoading(true);
+    mutation.mutate(data);
   };
 
   return (
@@ -53,15 +61,44 @@ const Login = () => {
       <Card className="w-full max-w-md shadow-xl transition-all duration-300 hover:shadow-2xl">
         <CardHeader className="space-y-2 text-center pb-6">
           <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-50">
-            Welcome Back
+            Create Account
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-400">
-            Log in to access your dashboard
+            Join us — only valid accounts allowed
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-5">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Full Name Field */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="fullName"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Full Name
+              </Label>
+              <div className="relative group">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Durga Gairhe"
+                  className="pl-10 pr-4 h-11 transition-all duration-200 
+                           border-gray-300 focus:border-blue-500 
+                           dark:border-gray-700 dark:focus:border-blue-500
+                           focus:ring-2 focus:ring-blue-500/20"
+                  {...register("fullName")}
+                  disabled={isSubmitting}
+                />
+              </div>
+              {errors.fullName && (
+                <p className="text-sm text-red-600 dark:text-red-400 animate-fade-in">
+                  {errors.fullName.message}
+                </p>
+              )}
+            </div>
+
             {/* Email Field */}
             <div className="space-y-2">
               <Label
@@ -145,31 +182,31 @@ const Login = () => {
               {isLoading || isSubmitting ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  <span>Signing In...</span>
+                  <span>Creating Account...</span>
                 </div>
               ) : (
-                "Sign In"
+                "Sign Up"
               )}
             </Button>
           </form>
 
-          {/* Register Link */}
+          {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don’t have an account?{" "}
+              Already have an account?{" "}
               <Link
-                to="/register"
-                className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 
+                to="/login"
+                className="font-medium  hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 
                          hover:underline transition-all duration-200"
               >
-                Register
+                Log in
               </Link>
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Fade-in animation for error messages */}
+      {/* Optional: Add subtle CSS for fade-in */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -189,4 +226,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

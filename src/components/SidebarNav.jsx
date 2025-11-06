@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+
 import {
   ChevronDown,
   ChevronRight,
@@ -22,10 +23,14 @@ import {
   Library as LibraryIcon,
   Database,
   QrCode,
+  DollarSign,
 } from "lucide-react";
-import { DollarSign } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { rolePermissions } from "@/config/permissions";
 
 const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
+  const { user } = useAuth();
+
   const menuGroups = [
     {
       title: "Main",
@@ -55,7 +60,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
         { name: "Training", href: "/training", icon: Dumbbell },
       ],
     },
-     {
+    {
       title: "Finances",
       items: [
         { name: "Expense Tracker", href: "/expense-tracker", icon: DollarSign },
@@ -81,7 +86,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
       items: [
         { name: "Code Log", href: "/code-log", icon: Code },
         { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
-         { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
+        { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
         { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
         { name: "JSON Formatter", href: "/json-formatter", icon: FileText },
         { name: "QR System", href: "/qr-system", icon: QrCode },
@@ -89,9 +94,41 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
     },
   ];
 
-  // ✅ Initialize all menus as open by default
+  // Filter menu items based on role
+  const filterMenuByRole = (groups) => {
+    const role = user?.role;
+    
+    if (!role || rolePermissions[role] === "all") {
+      return groups;
+    }
+
+    const userRole = role.toLowerCase();
+
+    if (userRole === "admin") {
+      const exclude = rolePermissions.admin.exclude;
+      return groups.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => !exclude.includes(item.href)),
+      }));
+    }
+
+    if (userRole === "user") {
+      const allow = rolePermissions.user.allow;
+      return groups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => allow.includes(item.href)),
+        }))
+        .filter((group) => group.items.length > 0); // Remove empty groups
+    }
+    return [];
+  };
+
+  const filteredMenuGroups = filterMenuByRole(menuGroups);
+
+  // Collapse state
   const [openMenus, setOpenMenus] = useState(
-    menuGroups.reduce((acc, group) => {
+    filteredMenuGroups.reduce((acc, group) => {
       acc[group.title] = true;
       return acc;
     }, {})
@@ -104,7 +141,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
   return (
     <nav className="mt-6 px-3">
       <div className="max-h-[calc(100vh-100px)] pb-12 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-        {menuGroups.map((group) => (
+        {filteredMenuGroups.map((group) => (
           <div key={group.title} className="mb-3">
             <button
               onClick={() => toggleMenu(group.title)}
@@ -112,9 +149,9 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
             >
               {group.title}
               {openMenus[group.title] ? (
-                <ChevronDown className="w-4 h-4 cursor-context-menu" />
+                <ChevronDown className="w-4 h-4" />
               ) : (
-                <ChevronRight className="w-4 h-4 cursor-context-menu" />
+                <ChevronRight className="w-4 h-4" />
               )}
             </button>
 
@@ -138,7 +175,7 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
                         className={`mr-3 h-5 w-5 ${
                           current
                             ? "text-blue-500 dark:text-blue-300"
-                            : "text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300"
+                            : "text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300"
                         }`}
                       />
                       {item.name}

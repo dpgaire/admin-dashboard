@@ -5,7 +5,6 @@ import {
   X,
   Home,
   Users,
-  FolderOpen,
   Layers,
   FileText,
   User,
@@ -106,13 +105,19 @@ const Layout = ({ children }) => {
         >
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
             <h1 className="text-xl font-bold text-gray-900 cursor-pointer dark:text-white">
-              <Link
-                to="https://www.durgagairhe.com.np/"
-                target="_blank"
-                className="hover:underline"
-              >
-                durGairhe
-              </Link>
+              {user.role === "superAdmin" ? (
+                <Link
+                  to="https://www.durgagairhe.com.np/"
+                  target="_blank"
+                  className="hover:underline"
+                >
+                  durGairhe
+                </Link>
+              ) : (
+                <Link to="/" className="hover:underline">
+                  Nexus
+                </Link>
+              )}
             </h1>
             <button
               onClick={() => setSidebarOpen(false)}

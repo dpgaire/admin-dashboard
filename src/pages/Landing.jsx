@@ -48,55 +48,52 @@ const Landing = () => {
     },
   ];
 
-  const plans = [
-    {
-      name: "Starter",
-      price: "$9",
-      period: "/month",
-      desc: "Perfect for solo creators and freelancers.",
-      features: [
-        "5 Projects & Blogs",
-        "AI Chat (10K tokens/mo)",
-        "Pomodoro & Notes",
-        "Basic Analytics",
-        "Export to PDF/MD",
-      ],
-      cta: "Start Free",
-      popular: false,
-    },
-    {
-      name: "Pro",
-      price: "$29",
-      period: "/month",
-      desc: "For growing teams and power users.",
-      features: [
-        "Unlimited Projects & Blogs",
-        "AI Chat (100K tokens/mo)",
-        "Team Chat & Roles",
-        "Advanced Analytics",
-        "Priority Support",
-        "Custom Domains",
-      ],
-      cta: "Most Popular",
-      popular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      desc: "For organizations with advanced needs.",
-      features: [
-        "Everything in Pro",
-        "Unlimited AI Tokens",
-        "SSO & Audit Logs",
-        "Dedicated Support",
-        "Custom Integrations",
-        "SLA & Uptime Guarantee",
-      ],
-      cta: "Contact Sales",
-      popular: false,
-    },
-  ];
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "/month",
+    desc: "Get started with the basics.",
+    features: [
+      "1 Project or Blog",
+      "AI Chat (2K tokens/mo)",
+      "Pomodoro Timer",
+      "Notes & Tasks",
+    ],
+    cta: "Start Free",
+    popular: false,
+  },
+  {
+    name: "Pro",
+    price: "$9",
+    period: "/month",
+    desc: "For creators and small teams.",
+    features: [
+      "Unlimited Projects & Blogs",
+      "AI Chat (50K tokens/mo)",
+      "Pomodoro & Notes",
+      "Basic Analytics",
+      "Export to PDF/MD",
+    ],
+    cta: "Upgrade",
+    popular: true,
+  },
+  {
+    name: "Business",
+    price: "$29",
+    period: "/month",
+    desc: "For teams that need more power and control.",
+    features: [
+      "Everything in Pro",
+      "AI Chat (200K tokens/mo)",
+      "Team Collaboration",
+      "Advanced Analytics",
+      "Priority Support",
+    ],
+    cta: "Get Started",
+    popular: false,
+  },
+];
 
   const testimonials = [
     {

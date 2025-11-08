@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
-      return false;
+      throw error; 
     }
   };
 

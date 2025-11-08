@@ -20,6 +20,7 @@ import { ArrowLeft } from "lucide-react";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,12 +38,15 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     setIsLoading(true);
+    setLoginError(null);
     try {
       const success = await login(data);
       if (success) {
         navigate(from, { replace: true });
       }
     } catch (error) {
+      const message = error.response?.data?.message || "An unexpected error occurred.";
+      setLoginError(message);
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -69,10 +73,16 @@ const Login = () => {
             <CardDescription className="text-gray-600 dark:text-gray-400">
               Log in to access your dashboard
             </CardDescription>
+             {loginError && (
+                <CardDescription className="text-lg font-semibold text-red-600 dark:text-red-400 animate-fade-in text-center">
+                  {loginError}!
+                </CardDescription>
+              )}
           </CardHeader>
 
           <CardContent className="space-y-5">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+             
               {/* Email Field */}
               <div className="space-y-2">
                 <Label
@@ -146,6 +156,8 @@ const Login = () => {
                   </p>
                 )}
               </div>
+
+              
 
               {/* Submit Button */}
               <Button

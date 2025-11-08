@@ -44,6 +44,7 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const {
     data: user = authUser,
@@ -81,42 +82,50 @@ const Profile = () => {
     queryClient.invalidateQueries({ queryKey: ["users"] });
   },
 });
+const regenMutation = useMutation({
+  mutationFn: (data) => usersAPI.updateProfile(user.id, data),
 
- const regenMutation = useMutation({
-  mutationFn: (data) => usersAPI.updateProfile(user.id,data),
   onMutate: async () => {
-    await queryClient.cancelQueries({ queryKey: ["user", user.id] });
+    await queryClient.cancelQueries({ queryKey: ["user", authUser?.id] });
 
-    const previous = queryClient.getQueryData(["user", user.id]);
-
-    // Optimistically update
-    const optimistic = {
+    const previous = queryClient.getQueryData(["user", authUser?.id]);
+    queryClient.setQueryData(["user", authUser?.id], {
       ...previous,
-      apiKey: "Regenerating...", // placeholder to show immediate change
-    };
-
-    queryClient.setQueryData(["user", user.id], optimistic);
+      apiKey: "Regenerating...",
+    });
 
     return { previous };
   },
+
   onError: (err, _variables, context) => {
     if (context?.previous) {
-      queryClient.setQueryData(["user", user.id], context.previous);
+      queryClient.setQueryData(["user", authUser?.id], context.previous);
     }
     toast.error(err.response?.data?.message ?? "Failed to regenerate API key");
   },
-  onSuccess: (res) => {
-    const updated = { ...user, apiKey: res.apiKey };
 
-    queryClient.setQueryData(["user", user.id], updated);
+  onSuccess: (res) => {
+    // 👇 handle response safely
+    const newApiKey = res?.data?.apiKey || res?.apiKey;
+    if (!newApiKey) {
+      toast.error("API key not found in server response");
+      return;
+    }
+
+    const updated = { ...user, apiKey: newApiKey };
+
+    // ✅ Update both React Query cache and AuthContext
+    queryClient.setQueryData(["user", authUser?.id], updated);
     setUser(updated);
 
     toast.success("API key regenerated!");
   },
+
   onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ["users"] });
+    queryClient.invalidateQueries({ queryKey: ["user", authUser?.id] });
   },
 });
+
 
 
   const {
@@ -160,7 +169,7 @@ useEffect(() => {
       const payload = {
       fullName: data.fullName,
       email: data.email,
-      regeregenerateApiKey:true,
+      regenerateApiKey:true,
       role: data.role,
       image: data.image || null,
     };
@@ -191,7 +200,9 @@ useEffect(() => {
     }
     try {
       await navigator.clipboard.writeText(user.apiKey);
+       setCopied(true);
       toast.success("API key copied!");
+       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Failed to copy");
     }
@@ -439,7 +450,7 @@ useEffect(() => {
                       className="flex items-center space-x-1"
                     >
                       <Copy className="h-4 w-4" />
-                      <span>Copy</span>
+                      <span>{copied ? "Copied!" : "Copy"}</span>
                     </Button>
 
                     {isEditing && (

@@ -419,6 +419,22 @@ const About = () => {
           </CardHeader>
           <CardContent className="space-y-5 pt-6">
             <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                {...register("contactDetails.fullName")}
+                placeholder="Durga Gairhe"
+                className="mt-1"
+              />
+              {errors.contactDetails?.fullName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.contactDetails.fullName.message}
+                </p>
+              )}
+            </div>
+
+            <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -513,9 +529,7 @@ const About = () => {
             className="min-w-32"
           >
             {createMutation.isPending || updateMutation.isPending ? (
-              <>
-                Saving...
-              </>
+              <>Saving...</>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
@@ -562,9 +576,11 @@ const About = () => {
                 )}
               </Button>
             </DialogTrigger>
-            <DialogContent  className={`sm:max-w-4xl ${
-                              isFullScreen ? "w-screen h-screen max-w-none" : ""
-                            }`}>
+            <DialogContent
+              className={`sm:max-w-4xl ${
+                isFullScreen ? "w-screen h-screen max-w-none" : ""
+              }`}
+            >
               {renderForm()}
             </DialogContent>
           </Dialog>
@@ -584,7 +600,6 @@ const About = () => {
                         src={aboutData.contactDetails?.profileImage}
                         alt={aboutData.title}
                       />
-
                       <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                         {aboutData.title?.charAt(0)}
                       </AvatarFallback>
@@ -639,9 +654,10 @@ const About = () => {
                 </div>
 
                 {/* Content */}
-                <CardContent className="pt-20 pb-8 space-y-6">
+                <CardContent className="lg:pt-14 pb-8 space-y-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="rounded-lg bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 py-2 text-3xl font-bold text-gray-900 dark:text-white">{aboutData.contactDetails?.fullName}</h2>
+                    <h2 className="text-3xl mt-4 font-bold text-gray-900 dark:text-white">
                       {aboutData.title}
                     </h2>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mt-1">

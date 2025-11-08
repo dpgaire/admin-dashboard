@@ -23,7 +23,7 @@ const LandingLayout = ({ children }) => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-10">
-            {["Features", "Pricing", "About"].map((item) => (
+            {["Features", "Pricing", "Roadmap", "About","FAQ"].map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
@@ -102,7 +102,7 @@ const LandingLayout = ({ children }) => {
         />
 
         {/* Menu Panel */}
-        <nav className="absolute right-0 top-0 h-full w-80 max-w-full bg-white dark:bg-black shadow-2xl border-l border-gray-200 dark:border-gray-800">
+        <nav className="absolute right-0 top-0 h-full w-full max-w-full bg-white dark:bg-black shadow-2xl border-l border-gray-200 dark:border-gray-800">
           <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-2xl font-bold tracking-tighter">Nexus</h2>
             <button
@@ -114,24 +114,24 @@ const LandingLayout = ({ children }) => {
           </div>
 
           <ul className="p-6 space-y-1">
-            {["Features", "Pricing", "About"].map((item) => (
+            {["Features", "Pricing", "Roadmap", "About","FAQ"].map((item) => (
               <li key={item}>
                 <a
                   href={`#${item.toLowerCase()}`}
                   onClick={() => setMobileOpen(false)}
-                  className="block py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
+                  className="block text-center  py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
                 >
                   {item}
                 </a>
               </li>
             ))}
 
-            <li className="pt-4">
+            <li className="pt-2">
               {isAuthenticated ? (
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="block py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
+                  className="block text-center py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
                 >
                   {user?.fullName}
                 </Link>
@@ -139,7 +139,7 @@ const LandingLayout = ({ children }) => {
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="block py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
+                  className="block text-center py-4 px-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/50 rounded-xl transition-all duration-200"
                 >
                   Login
                 </Link>
@@ -150,18 +150,19 @@ const LandingLayout = ({ children }) => {
               <Link
                 to={isAuthenticated ? "/dashboard" : "/register"}
                 onClick={() => setMobileOpen(false)}
+                
                 className="block w-full text-center py-4 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95"
               >
                 {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
               </Link>
             </li>
 
-            <li className="pt-8 flex justify-center">
+            <li className="pt-8 flex justify-center w-full">
               <Button
                 variant="ghost"
                 size="lg"
                 onClick={toggleTheme}
-                className="rounded-full"
+                className="rounded-full w-full border border-blue-400"
               >
                 {theme === "dark" ? (
                   <Sun className="h-6 w-6 mr-3" />
@@ -178,12 +179,12 @@ const LandingLayout = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <main className="pt-24 pb-32 px-6 container mx-auto max-w-7xl">
+      <main className="pt-4 pb-4 px-2 lg:px-6 container mx-auto max-w-7xl">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-12 mt-24">
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-12 mt-2">
         <div className="container mx-auto px-6 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400 tracking-wide">
             © {new Date().getFullYear()} Nexus. Crafted with precision.

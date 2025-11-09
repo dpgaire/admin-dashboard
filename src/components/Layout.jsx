@@ -69,7 +69,6 @@ const Layout = ({ children }) => {
     { name: "Blogs", href: "/blogs", icon: BookOpen },
     { name: "Skills", href: "/skills", icon: Layers },
     { name: "Training", href: "/training", icon: Dumbbell },
-    { name: "Queries", href: "/queries", icon: MessageSquare },
     { name: "Contact", href: "/contact", icon: Phone },
     { name: "Chat", href: "/chat", icon: MessageCircle },
     { name: "Chat Users", href: "/chat-user", icon: Users },

@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Select,
@@ -47,7 +47,20 @@ const ExpenseTracker = () => {
   const [editingExpense, setEditingExpense] = useState(null);
   const [deleteExpenseId, setDeleteExpenseId] = useState(null);
   const [selectedType, setSelectedType] = useState("expense");
-  const [formData, setFormData] = useState({}); // Track form data
+  const [formData, setFormData] = useState({});
+
+  // Global toggle for summary cards
+  const [showSummaryAmounts, setShowSummaryAmounts] = useState(false);
+
+  // Per-transaction toggle state
+  const [visibleAmounts, setVisibleAmounts] = useState({}); // { [id]: true/false }
+
+  const toggleAmountVisibility = (id) => {
+    setVisibleAmounts((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses"],
@@ -79,7 +92,7 @@ const ExpenseTracker = () => {
       setIsFormOpen(false);
       setEditingExpense(null);
       setSelectedType("expense");
-      setFormData({});
+      // set FormData({});
     },
     onError: () => toast.error("Failed to update expense"),
   });
@@ -98,7 +111,6 @@ const ExpenseTracker = () => {
     const data = { ...formData };
     data.amount = parseFloat(data.amount);
 
-    // Only include loanType if type is expense and selected
     if (data.type !== "expense") {
       delete data.loanType;
     }
@@ -110,7 +122,6 @@ const ExpenseTracker = () => {
     }
   };
 
-  // Update form data when type or loanType changes
   const handleTypeChange = (value) => {
     setSelectedType(value);
     setFormData((prev) => ({ ...prev, type: value }));
@@ -135,13 +146,15 @@ const ExpenseTracker = () => {
     }
   };
 
-  const filteredExpenses = expenses.filter(
-    (expense) =>
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (expense.loanType &&
-        expense.loanType.toLowerCase().includes(searchTerm.toLowerCase()))
-  ).reverse();
+  const filteredExpenses = expenses
+    .filter(
+      (expense) =>
+        expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (expense.loanType &&
+          expense.loanType.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .reverse();
 
   const totalIncome = filteredExpenses
     .filter((exp) => exp.type === "income")
@@ -153,7 +166,6 @@ const ExpenseTracker = () => {
 
   const netBalance = totalIncome - totalExpenses;
 
-  // Initialize form data when editing
   React.useEffect(() => {
     if (editingExpense) {
       setFormData({
@@ -167,6 +179,17 @@ const ExpenseTracker = () => {
       setSelectedType(editingExpense.type);
     }
   }, [editingExpense]);
+
+  // Masked amount component
+  const MaskedAmount = ({ amount, show, prefix = "", suffix = "" }) => {
+    const masked = "XXXX";
+    const formatted = `${prefix}Rs ${amount.toFixed(2)}${suffix}`;
+    return (
+      <span className="font-mono text-lg">
+        {show ? formatted : masked}
+      </span>
+    );
+  };
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -198,9 +221,10 @@ const ExpenseTracker = () => {
                 <label htmlFor="description">Description</label>
                 <Input
                   id="description"
-                  name="description"
                   value={formData.description || ""}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   required
                 />
               </div>
@@ -208,21 +232,19 @@ const ExpenseTracker = () => {
                 <label htmlFor="amount">Amount</label>
                 <Input
                   id="amount"
-                  name="amount"
                   type="number"
                   step="0.01"
                   value={formData.amount || ""}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, amount: e.target.value }))
+                  }
                   required
                 />
               </div>
               <div>
                 <label htmlFor="type">Type</label>
-                <Select
-                  value={formData.type || "expense"}
-                  onValueChange={handleTypeChange}
-                >
-                  <SelectTrigger className="w-full">
+                <Select value={formData.type || "expense"} onValueChange={handleTypeChange}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -232,7 +254,6 @@ const ExpenseTracker = () => {
                 </Select>
               </div>
 
-              {/* FIXED Loan Type Field */}
               {(selectedType === "expense" || editingExpense?.type === "expense") && (
                 <div>
                   <label htmlFor="loanType">Loan Type</label>
@@ -240,7 +261,7 @@ const ExpenseTracker = () => {
                     value={formData.loanType || undefined}
                     onValueChange={handleLoanTypeChange}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select loan type (optional)" />
                     </SelectTrigger>
                     <SelectContent>
@@ -259,9 +280,10 @@ const ExpenseTracker = () => {
                 <label htmlFor="category">Category</label>
                 <Input
                   id="category"
-                  name="category"
                   value={formData.category || ""}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, category: e.target.value }))
+                  }
                   required
                 />
               </div>
@@ -269,25 +291,22 @@ const ExpenseTracker = () => {
                 <label htmlFor="date">Date</label>
                 <Input
                   id="date"
-                  name="date"
                   type="date"
                   value={formData.date || new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, date: e.target.value }))
+                  }
                   required
                 />
               </div>
-              <Button
-                type="submit"
-                disabled={createExpense.isPending || updateExpense.isPending}
-              >
-                {editingExpense ? "Update Transaction" : "Add Transaction"}
+              <Button type="submit" disabled={createExpense.isPending || updateExpense.isPending}>
+                {editingExpense ? "Update" : "Add"} Transaction
               </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Rest of your component remains exactly the same */}
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
@@ -302,39 +321,61 @@ const ExpenseTracker = () => {
         </CardContent>
       </Card>
 
+      {/* Summary Cards with Global Toggle */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
-          <CardHeader>
-            <CardTitle className="text-green-700 dark:text-green-300">
-              Total Income
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-green-700 dark:text-green-300">Total Income</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSummaryAmounts(!showSummaryAmounts)}
+              className="h-8 w-8"
+            >
+              {showSummaryAmounts ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
           </CardHeader>
           <CardContent className="text-3xl font-bold text-green-800 dark:text-green-200">
-            Rs {totalIncome.toFixed(2)}
+            <MaskedAmount amount={totalIncome} show={showSummaryAmounts} prefix="" />
           </CardContent>
         </Card>
+
         <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700">
-          <CardHeader>
-            <CardTitle className="text-red-700 dark:text-red-300">
-              Total Expenses
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-red-700 dark:text-red-300">Total Expenses</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSummaryAmounts(!showSummaryAmounts)}
+              className="h-8 w-8"
+            >
+              {showSummaryAmounts ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
           </CardHeader>
           <CardContent className="text-3xl font-bold text-red-800 dark:text-red-200">
-            -Rs {totalExpenses.toFixed(2)}
+            -<MaskedAmount amount={totalExpenses} show={showSummaryAmounts} />
           </CardContent>
         </Card>
+
         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
-          <CardHeader>
-            <CardTitle className="text-blue-700 dark:text-blue-300">
-              Net Balance
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-blue-700 dark:text-blue-300">Net Balance</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSummaryAmounts(!showSummaryAmounts)}
+              className="h-8 w-8"
+            >
+              {showSummaryAmounts ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
           </CardHeader>
           <CardContent className="text-3xl font-bold text-blue-800 dark:text-blue-200">
-            Rs {netBalance.toFixed(2)}
+            <MaskedAmount amount={netBalance} show={showSummaryAmounts} prefix="" />
           </CardContent>
         </Card>
       </div>
 
+      {/* Transactions Table */}
       <div className="space-y-4">
         {filteredExpenses.length === 0 ? (
           <p className="text-center text-gray-500">No transactions found.</p>
@@ -352,80 +393,88 @@ const ExpenseTracker = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExpenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell className="font-medium">
-                      {expense.description}
-                    </TableCell>
-                    <TableCell>{expense.category}</TableCell>
-                    <TableCell>
-                      {expense.loanType ? (
-                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                          {expense.loanType.replace("-", " ")}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(expense.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell
-                      className={`text-right font-semibold ${
-                        expense.type === "income"
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-red-600 dark:text-red-400"
-                      }`}
-                    >
-                      {expense.type === "income" ? "+" : "-"}Rs {expense.amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingExpense(expense);
-                            setIsFormOpen(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteExpenseId(expense.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredExpenses.map((expense) => {
+                  const isVisible = visibleAmounts[expense.id];
+                  const displayAmount = isVisible
+                    ? expense.amount.toFixed(2)
+                    : "XXXX";
+
+                  return (
+                    <TableRow key={expense.id}>
+                      <TableCell className="font-medium">{expense.description}</TableCell>
+                      <TableCell>{expense.category}</TableCell>
+                      <TableCell>
+                        {expense.loanType ? (
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            {expense.loanType.replace("-", " ")}
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <span
+                            className={`font-semibold font-mono ${
+                              expense.type === "income"
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
+                            }`}
+                          >
+                            {expense.type === "income" ? "+" : "-"}Rs {displayAmount}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => toggleAmountVisibility(expense.id)}
+                          >
+                            {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingExpense(expense);
+                              setIsFormOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteExpenseId(expense.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Card>
         )}
       </div>
 
-      <AlertDialog
-        open={!!deleteExpenseId}
-        onOpenChange={() => setDeleteExpenseId(null)}
-      >
+      <AlertDialog open={!!deleteExpenseId} onOpenChange={() => setDeleteExpenseId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
-              transaction.
+              This action cannot be undone. This will permanently delete this transaction.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteExpense}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
+            <AlertDialogAction onClick={confirmDeleteExpense} className="bg-red-600 hover:bg-red-700">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

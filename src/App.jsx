@@ -19,7 +19,6 @@ import {
   About,
   Projects,
   Contacts,
-  Queries,
   Training,
   Blogs,
   Chat,
@@ -66,7 +65,6 @@ function App() {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contacts />} />
-                    <Route path="/queries" element={<Queries />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/blogs" element={<Blogs />} />
                     <Route path="/training" element={<Training />} />

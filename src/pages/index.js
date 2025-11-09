@@ -5,7 +5,6 @@ import Profile from "./Profile";
 import About from "./About";
 import Projects from "./Projects";
 import Contacts from "./Contacts";
-import Queries from "./Queries";
 import Training from "./Training";
 import Blogs from "./Blogs";
 import Chat from "./Chat";
@@ -37,7 +36,6 @@ export {
   About,
   Projects,
   Contacts,
-  Queries,
   Training,
   Blogs,
   Chat,

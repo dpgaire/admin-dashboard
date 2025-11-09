@@ -50,6 +50,17 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
         { name: "Goal Setting", href: "/goal-setting", icon: Target },
       ],
     },
+     {
+      title: "Development Tools",
+      items: [
+        { name: "Code Log", href: "/code-log", icon: Code },
+        { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
+        { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
+        { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
+        { name: "JSON Formatter", href: "/json-formatter", icon: FileText },
+        { name: "QR System", href: "/qr-system", icon: QrCode },
+      ],
+    },
     {
       title: "Content Management",
       items: [
@@ -69,29 +80,13 @@ const SidebarNav = ({ setSidebarOpen, isCurrentPath }) => {
     {
       title: "Communication",
       items: [
-        { name: "Queries", href: "/queries", icon: MessageSquare },
-        { name: "Contact", href: "/contact", icon: Phone },
-      ],
-    },
-    {
-      title: "Chat System",
-      items: [
         { name: "Chat", href: "/chat", icon: MessageCircle },
         { name: "Chat Users", href: "/chat-user", icon: Users },
         { name: "Chat History", href: "/chat-history", icon: History },
+        { name: "Contact", href: "/contact", icon: Phone },
       ],
     },
-    {
-      title: "Development Tools",
-      items: [
-        { name: "Code Log", href: "/code-log", icon: Code },
-        { name: "Prompt Storage", href: "/prompt-storage", icon: Database },
-        { name: "Markdown to PDF", href: "/md-to-pdf", icon: FileText },
-        { name: "Rich Text Editor", href: "/rich-text-editor", icon: FileText },
-        { name: "JSON Formatter", href: "/json-formatter", icon: FileText },
-        { name: "QR System", href: "/qr-system", icon: QrCode },
-      ],
-    },
+   
   ];
 
   // Filter menu items based on role

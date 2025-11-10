@@ -284,7 +284,7 @@ const Users = () => {
                     {/* Main Content */}
                     <CardContent className="p-6 pt-12 text-center">
                       <Avatar className="w-20 h-20 mx-auto mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
-                        <AvatarImage src={user.avatar} />
+                        <AvatarImage src={user.image} />
                         <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-primary to-purple-600 text-white">
                           {getInitials(user.fullName)}
                         </AvatarFallback>

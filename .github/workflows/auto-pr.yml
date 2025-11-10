@@ -1,0 +1,32 @@
+name: Create and Merge Pull Request
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Auto-generated PR
+          title: '[AUTO] PR from ${{ github.ref_name }}'
+          body: This is an auto-generated pull request from branch `${{ github.ref_name }}`.
+          branch: ${{ github.ref_name }}
+          base: main
+          labels: automerge
+
+      - name: Enable Auto-merge
+        if: steps.cpr.outputs.pull-request-number != ''
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
